@@ -1,0 +1,95 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    targetNamespace="http://www.adahas.com/schema/jmxeval-1.2"
+    xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2">
+    
+  <xs:element name="jmxeval">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="connection" type="jmxeval:connection" minOccurs="1" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+  
+  <xs:complexType name="connection">
+    <xs:sequence>
+      <xs:element name="eval" type="jmxeval:eval" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="url" type="xs:string" use="required" />
+    <xs:attribute name="username" type="xs:string" />
+    <xs:attribute name="password" type="xs:string" />
+  </xs:complexType>
+  
+  <xs:complexType name="eval">
+    <xs:sequence>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="query" type="jmxeval:query" />
+        <xs:element name="expr" type="jmxeval:expr" />
+      </xs:choice>
+      <xs:element name="check" type="jmxeval:check" minOccurs="1" maxOccurs="1" />
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required" />
+  </xs:complexType>
+  
+  <xs:complexType name="query">
+    <xs:sequence>
+      <xs:element name="perf" type="jmxeval:perf" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="var" type="xs:string" use="required" />
+    <xs:attribute name="objectName" type="xs:string" use="required" />
+    <xs:attribute name="attribute" type="xs:string" use="required" />
+    <xs:attribute name="compositeAttribute" type="xs:string" />
+  </xs:complexType>
+  
+  <xs:complexType name="expr">
+    <xs:sequence>
+      <xs:element name="perf" type="jmxeval:perf" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="var" type="xs:string" use="required" />
+    <xs:attribute name="expression" type="xs:string" use="required" />
+    <xs:attribute name="scale" type="xs:integer" default="2" />
+  </xs:complexType>
+  
+  <xs:complexType name="check">
+    <xs:sequence>
+      <xs:element name="perf" type="jmxeval:perf" minOccurs="0" maxOccurs="1"/>
+    </xs:sequence>
+    <xs:attribute name="useVar" type="xs:string" use="required" />
+    <xs:attribute name="critical" type="xs:string" />
+    <xs:attribute name="warning" type="xs:string" />
+    <xs:attribute name="message" type="xs:string" />
+    <xs:attribute name="mode" type="jmxeval:mode" default="default" />
+  </xs:complexType>
+  
+  <xs:complexType name="perf">
+    <xs:attribute name="label" type="xs:string" />
+    <xs:attribute name="critical" type="xs:string" />
+    <xs:attribute name="warning" type="xs:string" />
+    <xs:attribute name="min" type="xs:string" />
+    <xs:attribute name="max" type="xs:string" />
+    <xs:attribute name="unit" type="jmxeval:unit" />
+  </xs:complexType>
+  
+  <xs:simpleType name="mode">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="default"/>
+      <xs:enumeration value="regex"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="unit">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value=""/>
+      <xs:enumeration value="us"/>
+      <xs:enumeration value="ms"/>
+      <xs:enumeration value="s"/>
+      <xs:enumeration value="%"/>
+      <xs:enumeration value="B"/>
+      <xs:enumeration value="KB"/>
+      <xs:enumeration value="MB"/>
+      <xs:enumeration value="GB"/>
+      <xs:enumeration value="TB"/>
+      <xs:enumeration value="c"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>
