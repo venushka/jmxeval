@@ -29,7 +29,7 @@ public class Element {
   /**
    * Regex to match content within square braces (variable names within strings)
    */
-  private final static String REGEX_INNER_BRACES = "\\{([^\\{\\}]*)\\}";
+  private final static String REGEX_INNER_BRACES = "\\$\\{([^\\{\\}]*)\\}";
   
   /**
    * Pattern to match REGEX_INNER_BRACES regex

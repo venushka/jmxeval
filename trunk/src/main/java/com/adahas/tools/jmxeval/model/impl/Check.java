@@ -128,7 +128,7 @@ public class Check extends Element implements PerfDataSupport {
   protected Status getStatusInRegExMode(final Object value, final String criticalLevel, final String warningLevel) {
     Status resultStatus = null; 
     
-    if (criticalLevel == null) {
+    if (criticalLevel != null) {
       // critical level
       final Pattern pattern = Pattern.compile(criticalLevel);
       final Matcher matcher = pattern.matcher(value.toString());
