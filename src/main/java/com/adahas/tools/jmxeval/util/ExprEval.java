@@ -48,22 +48,22 @@ public class ExprEval {
   /**
    * Regular expression to match multiply operator
    */
-  protected static final String REGEX_MULTIPLY = "\\*";
+  protected static final String REGEX_OP_MULTIPLY = "\\*";
   
   /**
    * Regular expression to match division operator
    */
-  protected static final String REGEX_DIVIDE = "\\/";
+  protected static final String REGEX_OP_DIVIDE = "\\/";
   
   /**
    * Regular expression to match addition operator
    */
-  protected static final String REGEX_ADD = "\\+";
+  protected static final String REGEX_OP_ADD = "\\+";
   
   /**
    * Regular expression to match subtract operator
    */
-  protected static final String REGEX_SUBTRACT = "\\-";
+  protected static final String REGEX_OP_SUBTRACT = "\\-";
   
   /**
    * Open brace character
@@ -82,7 +82,7 @@ public class ExprEval {
     DIVIDE,
     MULTIPLY,
     ADD,
-    SUBSTRACT;
+    SUBSTRACT
   }
   
   /**
@@ -232,16 +232,16 @@ public class ExprEval {
     
     switch (operation) {
       case ADD:
-        opRegEx = REGEX_ADD;
+        opRegEx = REGEX_OP_ADD;
         break;
       case SUBSTRACT:
-        opRegEx = REGEX_SUBTRACT;
+        opRegEx = REGEX_OP_SUBTRACT;
         break;
       case MULTIPLY:
-        opRegEx = REGEX_MULTIPLY;
+        opRegEx = REGEX_OP_MULTIPLY;
         break;
       case DIVIDE:
-        opRegEx = REGEX_DIVIDE;
+        opRegEx = REGEX_OP_DIVIDE;
         break;
       default:
         throw new IllegalArgumentException("Unsupported operation: " + operation);  
@@ -270,7 +270,7 @@ public class ExprEval {
       final BigDecimal operand1 = new BigDecimal(matcher.group(1)); 
       final BigDecimal operand2 = new BigDecimal(matcher.group(2)); 
 
-      BigDecimal result = null; 
+      Object result = null; 
       switch (operation) {
         case ADD:
           result = operand1.add(operand2);

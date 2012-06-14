@@ -29,6 +29,7 @@
       <xs:element name="check" type="jmxeval:check" minOccurs="1" maxOccurs="1" />
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required" />
+    <xs:attribute name="host" type="xs:string" />
   </xs:complexType>
   
   <xs:complexType name="query">
