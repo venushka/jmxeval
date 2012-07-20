@@ -124,4 +124,15 @@ public class Context {
       throw new EvalException(Status.UNKNOWN, "Variable not set: " + name);
     }
   }
+  
+  /**
+   * Check if a variable exists in the global variables collection
+   * 
+   * @param name Name of the variable
+   * @return If the value is present
+   * @throws EvalException When the variable is not set
+   */
+  public boolean hasVar(final String name) throws EvalException {
+    return variables.containsKey(name);
+  }
 }

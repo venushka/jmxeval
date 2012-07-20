@@ -100,7 +100,31 @@ public class Element {
     final StringBuffer buffer = new StringBuffer();
     while (matcher.find()) {
       final Object result = context.getVar(matcher.group(1));
-      matcher.appendReplacement(buffer, result.toString());
+      matcher.appendReplacement(buffer, String.valueOf(result));
+    }
+    matcher.appendTail(buffer);
+    
+    return buffer.toString();
+  }
+  
+  /**
+   * Replaces variable names mentioned within square brackets within a string with
+   * their actual values using the the global variables set
+   * 
+   * @param source String to check for variable names
+   * @return String with variable names replaced with values
+   * @throws EvalException When the mentioned variable is not defined
+   */
+  protected String replaceWithVars(final String source) {
+    final Matcher matcher = PATTERN_INNER_BRACES.matcher(source);
+    
+    final StringBuffer buffer = new StringBuffer();
+    while (matcher.find()) {
+      final String varName = matcher.group(1);
+      final Object result = System.getProperty(varName);
+      if (result != null) {
+        matcher.appendReplacement(buffer, String.valueOf(result));
+      }
     }
     matcher.appendTail(buffer);
     
@@ -125,6 +149,11 @@ public class Element {
       returnValue = defaultValue;
     } else {
       returnValue = attributeNode.getNodeValue();
+    }
+    
+    // Replace any variables set via system properties
+    if (returnValue != null) {
+      returnValue = replaceWithVars(returnValue);
     }
     
     return returnValue;
