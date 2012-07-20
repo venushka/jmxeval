@@ -12,4 +12,4 @@
 # Executes JMXEval
 #
 LIB_DIR=`dirname $0`
-$JAVA_HOME/bin/java -jar $LIB_DIR/jmxeval-1.2.1.jar $@
+$JAVA_HOME/bin/java -jar $LIB_DIR/jmxeval-1.2.2.jar $@
