@@ -7,6 +7,8 @@ import java.util.Map;
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
+import javax.management.remote.rmi.RMIConnectorServer;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 import org.w3c.dom.Node;
 
@@ -36,6 +38,11 @@ public class Connection extends Element {
   private transient final String password;
   
   /**
+   * Whether SSL is enabled
+   */
+  private transient final boolean ssl;
+  
+  /**
    * Constructs the element
    * 
    * @param node XML node
@@ -47,6 +54,7 @@ public class Connection extends Element {
     url = getNodeAttribute(node, "url");
     username = getNodeAttribute(node, "username");
     password = getNodeAttribute(node, "password");
+    ssl = Boolean.parseBoolean(getNodeAttribute(node, "ssl", Boolean.FALSE.toString()));
   }
   
   /**
@@ -63,6 +71,11 @@ public class Connection extends Element {
       
       if (username != null && password != null) {
         jmxEnv.put(JMXConnector.CREDENTIALS, new String[] {username, password});
+      }
+      
+      if (ssl) {
+        SslRMIClientSocketFactory csf = new SslRMIClientSocketFactory();
+        jmxEnv.put("com.sun.jndi.rmi.factory.socket", csf);
       }
       
       jmxConnector = JMXConnectorFactory.connect(jmxServiceURL, jmxEnv);
