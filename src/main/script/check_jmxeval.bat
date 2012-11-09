@@ -12,4 +12,4 @@
 :: Executes JMXEval
 ::
 set LIB_DIR=%~dp0
-%JAVA_HOME%\bin\java -jar %LIB_DIR%\jmxeval-1.2.2.jar %*
+%JAVA_HOME%\bin\java -jar %LIB_DIR%\jmxeval-1.2.3.jar %*
