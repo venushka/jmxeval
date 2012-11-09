@@ -1,6 +1,8 @@
 package com.adahas.tools.jmxeval.model.impl;
 
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.Arrays;
 
 import javax.management.JMException;
 import javax.management.ObjectName;
@@ -69,7 +71,12 @@ public class Query extends Element implements PerfDataSupport {
       
       // retrieve attribute value
       if (compositeAttribute == null) {
-        attributeValue = context.getConnection().getAttribute(mbeanName, attribute);
+        final Object attributeVal = context.getConnection().getAttribute(mbeanName, attribute);
+        if (attributeVal instanceof String[]) {
+          attributeValue = Arrays.asList((String[]) attributeVal);
+        } else {
+          attributeValue = attributeVal;
+        }
       } else {
         final CompositeDataSupport compositeAttributeValue = 
             (CompositeDataSupport) context.getConnection().getAttribute(mbeanName, compositeAttribute);
