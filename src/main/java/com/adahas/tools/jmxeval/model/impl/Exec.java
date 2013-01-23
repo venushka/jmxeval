@@ -7,7 +7,6 @@ import java.util.List;
 import javax.management.JMException;
 import javax.management.MBeanInfo;
 import javax.management.MBeanOperationInfo;
-import javax.management.MBeanParameterInfo;
 import javax.management.ObjectName;
 
 import org.w3c.dom.Node;
