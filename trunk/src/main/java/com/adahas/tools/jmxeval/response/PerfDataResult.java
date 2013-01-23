@@ -77,7 +77,15 @@ public class PerfDataResult {
     }
     
     builder.append("=");
-    builder.append(String.valueOf(value));
+    final String strValue = String.valueOf(value);
+    
+    if (strValue.equalsIgnoreCase("true")) {
+      builder.append("1");
+    } else if (strValue.equalsIgnoreCase("false")) {
+      builder.append("0");
+    } else {
+      builder.append(strValue);
+    }    
     
     if (unit != null) {
       builder.append(unit);

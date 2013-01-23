@@ -5,7 +5,7 @@
   <name>jmxeval</name>
   <groupId>adahas</groupId>
   <artifactId>jmxeval</artifactId>
-  <version>1.2.4</version>
+  <version>1.2.5</version>
   <packaging>jar</packaging>
   <url>http://www.adahas.com/projects/jmxeval</url>
 
