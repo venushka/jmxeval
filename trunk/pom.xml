@@ -66,5 +66,11 @@
       <version>1.8.5</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>args4j</groupId>
+      <artifactId>args4j</artifactId>
+      <version>2.0.16</version>
+      <scope>compile</scope>
+    </dependency>
   </dependencies>
 </project>

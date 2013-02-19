@@ -22,6 +22,14 @@
       </includes>
       <outputDirectory>/</outputDirectory>
     </fileSet>
+    <!-- Include the Dependency Jars -->
+    <fileSet>
+      <directory>${project.build.directory}/lib</directory>
+      <includes>
+        <include>*.jar</include>
+      </includes>
+      <outputDirectory>/lib</outputDirectory>
+    </fileSet>
     <!-- Include all scripts -->
     <fileSet>
       <directory>${basedir}/src/main/script</directory>
@@ -38,4 +46,11 @@
       </includes>
     </fileSet>
   </fileSets>
+  <dependencySets>
+    <dependencySet>
+      <outputDirectory>lib</outputDirectory>
+      <useProjectArtifact>false</useProjectArtifact>
+      <scope>runtime</scope>
+    </dependencySet>
+  </dependencySets>
 </assembly>

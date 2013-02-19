@@ -1,10 +1,11 @@
 package com.adahas.tools.jmxeval;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import org.kohsuke.args4j.CmdLineException;
+import org.kohsuke.args4j.CmdLineParser;
 
 import com.adahas.tools.jmxeval.exception.ConfigurationException;
 import com.adahas.tools.jmxeval.exception.EvalException;
@@ -21,16 +22,6 @@ import com.adahas.tools.jmxeval.response.Status;
 public class App {
   
   /**
-   * Command line argument prefix
-   */
-  private static final String ARG_SWITCH_PREFIX = "--";
-  
-  /**
-   * Command line argument key value separator
-   */
-  private static final String ARG_VALUE_SEPARATOR = "=";
-  
-  /**
    * Process executor method as the actual process will need to perform
    * System.exit() which will prevent using test cases to test logic
    * as it exists the current VM
@@ -38,16 +29,19 @@ public class App {
    * @param args Command line args
    * @param outputWriter Writer to direct the output to
    * @return process return value
+   * @throws CmdLineException with bad command line options
    */
   @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   protected int execute(final String[] args, final PrintWriter outputWriter) {
     int returnValue;
     
+    final Context context = getContextInstance(new HashMap<String,String>());
+    CmdLineParser parser = new CmdLineParser(context);
+    
     // execute the app
     try {
-      final Map<String, String> argsMap = parseArgs(args);
-      final Context context = getContextInstance(argsMap);
-    
+      parser.parseArgument(args);
+      
       // capture start time
       final long startTime = System.currentTimeMillis();
       
@@ -92,6 +86,15 @@ public class App {
       
       // indicate error by returning a non-zero value
       returnValue = e.getStatus().getValue();
+    } catch (CmdLineException e) {
+      e.printStackTrace();
+      // print usage information
+      System.err.println(e.getMessage());
+      System.err.print("java -jar jmxeval.jar ");
+      parser.printSingleLineUsage(System.err);
+      System.err.println();
+      parser.printUsage(System.err);
+      returnValue = Status.UNKNOWN.getValue();
     }
     
     return returnValue;
@@ -109,58 +112,6 @@ public class App {
             args, new PrintWriter(System.out, true)
         )
     );
-  }
-  
-  /**
-   * Parses command line args to a map
-   * 
-   * @param args Argument list
-   * @return Parsed arguments map
-   */
-  @SuppressWarnings({"PMD.DataflowAnomalyAnalysis", "PMD.ConfusingTernary"})
-  protected Map<String, String> parseArgs(final String[] args) throws ConfigurationException {
-    
-    // throw exception if no argument supplied (show syntax)
-    if (args.length == 0) {
-      throw new ConfigurationException("Syntax: check_jmxeval <filename> [--validate=true [--schema=x.x]]");
-    }
-  
-    final Map<String, String> argsMap = new HashMap<String, String>();
-    
-    // supported switches
-    final List<String> switches = new ArrayList<String>();
-    switches.add(Context.CONFIG_VALIDATE);
-    switches.add(Context.CONFIG_SCHEMA);
-    
-    for (String arg : args) {
-
-      // process arguments with -- prefix
-      if (arg.startsWith(ARG_SWITCH_PREFIX) && arg.contains(ARG_VALUE_SEPARATOR)) {
-        final String argName = arg.substring(ARG_SWITCH_PREFIX.length(), arg.indexOf(ARG_VALUE_SEPARATOR));
-        
-        if (switches.contains(argName)) {
-          if (argsMap.containsKey(argName)) {
-            throw new ConfigurationException("Error: Repeated arguments found. [" + ARG_SWITCH_PREFIX + argName + "]");
-          } else {
-            argsMap.put(argName, arg.substring(arg.indexOf(ARG_VALUE_SEPARATOR) + 1));
-          }
-        } else {
-          throw new ConfigurationException("Error: Invalid argument specified. [" + arg + "]");
-        }
-        
-      } else if (!arg.startsWith(ARG_SWITCH_PREFIX)) {
-        // process argument with no -- prefix
-        if (argsMap.containsKey(Context.CONFIG_FILENAME)) {
-          throw new ConfigurationException("Error: Multiple filenames not supported. [" + arg + "]");
-        } else {
-          argsMap.put(Context.CONFIG_FILENAME, arg);
-        }
-      } else {
-        throw new ConfigurationException("Error: Invalid argument specified. [" + arg + "]");
-      }
-    }
-    
-    return argsMap;
   }
   
   /**
