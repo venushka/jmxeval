@@ -12,5 +12,5 @@
 :: Executes JMXEval
 ::
 set BASE_DIR=%~dp0
-set LIB_DIR=%BASE_DIR%/lib
-%JAVA_HOME%\bin\java -classpath %BASE_DIR%\jmxeval-1.2.5.jar;%LIB_DIR%/args4j-2.0.16.jar com.adahas.tools.jmxeval.App %*
+set LIB_DIR=%BASE_DIR%\lib
+%JAVA_HOME%\bin\java -classpath %BASE_DIR%\jmxeval-1.2.6.jar;%LIB_DIR%\args4j-2.0.16.jar com.adahas.tools.jmxeval.App %*

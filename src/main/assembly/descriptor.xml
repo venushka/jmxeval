@@ -8,8 +8,7 @@
   
   <!-- Distribution formats -->
   <formats>
-    <format>tar.gz</format>
-	<format>zip</format>
+	  <format>zip</format>
   </formats>
   
   <!-- Included content -->
