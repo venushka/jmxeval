@@ -12,6 +12,7 @@ import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.model.PerfDataSupport;
 import com.adahas.tools.jmxeval.response.EvalResult;
 import com.adahas.tools.jmxeval.response.Status;
+import com.adahas.tools.jmxeval.util.NagiosRange;
 
 /**
  * Element to perform Nagios style checks on variables
@@ -203,30 +204,14 @@ public class Check extends Element implements PerfDataSupport {
     
     // range check for numerics
     final Double doubleValue = ((Number) value).doubleValue();
+    NagiosRange critical = new NagiosRange(criticalLevel);
+    NagiosRange warning  = new NagiosRange(warningLevel);
     
-    final Double critical = Double.parseDouble(criticalLevel);
-    final Double warning = Double.parseDouble(warningLevel);
-    
-    if (critical > warning) {
-      if (doubleValue >= critical) {
-        resultStatus = Status.CRITICAL;
-      } else if (doubleValue >= warning) {
-        resultStatus = Status.WARNING;
-      }
-    } else if (warning > critical) {
-      if (doubleValue <= critical) {
-        resultStatus = Status.CRITICAL;
-      } else if (doubleValue <= warning) {
-        resultStatus = Status.WARNING;
-      }
-    } else {
-      if (doubleValue.equals(critical)) {
-        resultStatus = Status.CRITICAL;
-      } else if (doubleValue.equals(warning)) {
-        resultStatus = Status.WARNING;
-      }
+    if (!critical.isValueOK(doubleValue)) {
+      resultStatus = Status.CRITICAL;
+    } else if (!warning.isValueOK(doubleValue)) {
+      resultStatus = Status.WARNING;
     }
-    
     return resultStatus;
   }
 
