@@ -1,7 +1,6 @@
 package com.adahas.tools.jmxeval.model.impl;
 
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.Arrays;
 
 import javax.management.JMException;

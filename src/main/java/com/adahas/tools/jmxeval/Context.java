@@ -5,6 +5,9 @@ import java.util.Map;
 
 import javax.management.MBeanServerConnection;
 
+import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.Argument;
+
 import com.adahas.tools.jmxeval.exception.EvalException;
 import com.adahas.tools.jmxeval.response.Response;
 import com.adahas.tools.jmxeval.response.Status;
@@ -113,26 +116,51 @@ public class Context {
   /**
    * Get a variable from the global variables collection
    * 
-   * @param name Name of the variable
+   * @param name Name of the variable with optional : separated default value.
    * @return Value of the variable
-   * @throws EvalException When the variable is not set
+   * @throws EvalException When the variable is not set and no default is provided
    */
   public Object getVar(final String name) throws EvalException {
-    if (variables.containsKey(name)) {
-      return variables.get(name);
+    String key = name;
+    String defaultValue = null;
+    int seperator = name.indexOf(":");
+    if (seperator >= 0)
+    {
+        key = name.substring(0, seperator);
+        defaultValue = name.substring(seperator+1);
+    }
+    if (variables.containsKey(key)) {
+      return variables.get(key);
+    } else if (defaultValue != null) {
+      return defaultValue;
     } else {
       throw new EvalException(Status.UNKNOWN, "Variable not set: " + name);
     }
   }
   
-  /**
-   * Check if a variable exists in the global variables collection
-   * 
-   * @param name Name of the variable
-   * @return If the value is present
-   * @throws EvalException When the variable is not set
-   */
-  public boolean hasVar(final String name) throws EvalException {
-    return variables.containsKey(name);
+  @Option(name="--" + CONFIG_VALIDATE, metaVar="<boolean>", usage="set validation true|false, default is false")
+  protected void setConfigValidate(String value) {
+    config.put(CONFIG_VALIDATE, value);
+  }
+  
+  @Option(name="--" + CONFIG_SCHEMA, metaVar="<version>", usage="set schema version")
+  protected void setConfigSchema(String value) {
+    config.put(CONFIG_SCHEMA, value);
+  }
+  
+  @Option(name="--set", aliases={"--define"}, metaVar="<name=value>", usage="set variable name to value")
+  protected void setDefine(String name_value) throws EvalException
+  {
+    String[] s = name_value.split("=", 2);
+    if (s.length != 2)
+    {
+      throw new EvalException(Status.UNKNOWN, "arg to --set ("+name_value+") must be in \"name=value\" format!");
+    }
+    setVar(s[0], s[1]);
+  }
+  
+  @Argument (metaVar="<filename>", required=true)
+  protected void setConfigFilename(String value) {
+    config.put(CONFIG_FILENAME, value);
   }
 }

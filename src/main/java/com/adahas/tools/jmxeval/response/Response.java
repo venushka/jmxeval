@@ -83,6 +83,8 @@ public class Response {
         format.format(checkCountFormat, i + 1);
         builder.append(evalResults.get(i));
       }
+      
+      format.close();
     } else if (evalResults.size() == 1) {
       
       builder.append(evalResults.get(0));
