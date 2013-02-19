@@ -5,7 +5,7 @@
   <name>jmxeval</name>
   <groupId>adahas</groupId>
   <artifactId>jmxeval</artifactId>
-  <version>1.2.5</version>
+  <version>1.2.6</version>
   <packaging>jar</packaging>
   <url>http://www.adahas.com/projects/jmxeval</url>
 
@@ -17,12 +17,19 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>2.3.2</version>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.0</version>
         <configuration>
           <compilerVersion>1.5</compilerVersion>
           <source>1.5</source>
           <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
           <archive>
             <manifest>
               <mainClass>com.adahas.tools.jmxeval.App</mainClass>
