@@ -11,6 +11,9 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <!-- version information for used dependencies -->
+    <dep.junit.version>4.11</dep.junit.version>
   </properties>
 
   <build>
@@ -64,7 +67,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.10</version>
+      <version>${dep.junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
