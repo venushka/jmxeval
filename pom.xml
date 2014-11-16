@@ -14,6 +14,7 @@
 
     <!-- version information for used dependencies -->
     <dep.junit.version>4.11</dep.junit.version>
+    <dep.mockito.version>1.10.8</dep.mockito.version>
   </properties>
 
   <build>
@@ -73,7 +74,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-all</artifactId>
-      <version>1.8.5</version>
+      <version>${dep.mockito.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
