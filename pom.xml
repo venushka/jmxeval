@@ -15,6 +15,10 @@
     <!-- version information for used dependencies -->
     <dep.junit.version>4.11</dep.junit.version>
     <dep.mockito.version>1.10.8</dep.mockito.version>
+
+    <!-- versions of used plugins -->
+    <plug.clean.version>2.5</plug.clean.version>
+    <plug.jar.version>2.5</plug.jar.version>
   </properties>
 
   <build>
@@ -32,7 +36,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>2.3.2</version>
+        <version>${plug.jar.version}</version>
         <configuration>
           <archive>
             <manifest>
@@ -60,6 +64,11 @@
             </goals>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+	<groupId>org.apache.maven.plugins</groupId>
+	<artifactId>maven-clean-plugin</artifactId>
+	<version>${plug.clean.version}</version>
       </plugin>
     </plugins>
   </build>
