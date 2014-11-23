@@ -1,6 +1,8 @@
 = JMXEval User Guide
  Venushka (venushka@gmail.com); Oliver B. Fischer (o.b.fischer@swe-blog.net)
 
+:source-highlighter: highlightjs
+
 [.lead]
 JMXEval is a plugin for Nagios/NRPE which can query JMX attributes or return values of JMX operations
 
@@ -72,17 +74,21 @@ Additionally, you can refer documentation related your Tomcat, Spring framework,
 to determine other ways enabling JMX and exposing more useful information related
 to the application.
 
-////
-//Your first jmxeval check configuration
-////
-//Before getting in to details about all the checks that jmxeval can perform, lets start with a simple check which checks for the current thread count in a Java process.
-////
-//This check will include,
-////
-//    Initiating a JMX connection to a JMX enabled Java process, by authenticating itself with a given username and a password (without SSL)
-//    Querying the ThreadCount on the java.lang:type=Threading MBean
-//    Checking if the thread count is in the expected range
-//    Including the thread count in performance data which Nagios could use to produce history graphs
+
+== Your first JMXEval check configuration
+
+Before getting in to details about all the checks that JMXEval can perform,
+lets start with a simple check which checks for the current thread count
+in a Java process.
+
+This check will include,
+
+. Initiating a JMX connection to a JMX enabled Java process,
+  by authenticating itself with a given username and a password (without SSL)
+. Querying the ThreadCount on the java.lang:type=Threading MBean
+. Checking if the thread count is in the expected range
+. Including the thread count in performance data which Nagios could use to
+  produce history graphs
 
 To perform this check, first you will need to make sure that you have
 configuration file that instructs JMXEval to perform this check. Following
@@ -94,80 +100,92 @@ is a sample configuration file you could use for this.
 <jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
+  <!--
+    connect to Java process running on 'localhost' having JMX agent exposed on port '9010'
+    using username 'myUser' and password 'myPassword'
+  -->
+  <connection url="service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi"
+              username="myUser" password="myPassword">
+
     <!--
-      connect to Java process running on 'localhost' having JMX agent exposed on port '9010'
-      using username 'myUser' and password 'myPassword'
-    -->
-//  <connection url="service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi"
-//      username="myUser" password="myPassword">
-////
-//    <!--
-//      define a JMX check to evaluate the thread count of the process named as 'Threads'
-//     -->
-//    <eval name="Threads">
-////
-//      <!--
-//        query the JMX connection to get the attribute 'ThreadCount' from the JMX bean with object name
-//        'java.lang:type=Threading' and assign the retrieved value to a variable named 'threadCount'
-//       -->
-               <query var="threadCount" objectName="java.lang:type=Threading" attribute="ThreadCount" />
+      define a JMX check to evaluate the thread count of the process named as 'Threads'
+      -->
+    <eval name="Threads">
+      <!--
+        query the JMX connection to get the attribute 'ThreadCount' from the JMX bean
+        with object name 'java.lang:type=Threading' and assign the retrieved value
+        to a variable named 'threadCount'
+        -->
+      <query var="threadCount" objectName="java.lang:type=Threading"
+             attribute="ThreadCount" />
+      <!--
+        perform a check using the 'threadCount' variable to see if the value of the
+        variable is in the expected range.
+        if the value is equals to or is over 30 the check will result in a warning
+        status, where as if the value is equals to or is over 40 the check will result
+        in critical status.
 
-               <!--
-                 perform a check using the 'threadCount' variable to see if the value of the
-                 variable is in the expected range.
+        the message displayed with the plugin output would be 'ThreadCount is
+        ${threadCount}' where the '${threadCount}' would be replaced with the
+        value of the variable.
+        -->
+      <check useVar="threadCount" warning="30" critical="40"
+             message="ThreadCount is ${threadCount}">
 
-                 if the value is equals to or is over 30 the check will result in a warning
-                 status, where as if the value is equals to or is over 40 the check will result
-                 in critical status.
-
-                 the message displayed with the plugin output would be 'ThreadCount is
-                 ${threadCount}' where the '${threadCount}' would be replaced with the
-                 value of the variable.
-               -->
-               <check useVar="threadCount" warning="30" critical="40"
-                      message="ThreadCount is ${threadCount}">
-
-                <!--
-                 the variable used in this check, in this instance 'threadCount', will be
-                 included in the performance data produced from the plugin output.
-                -->
-                <perf />
-            </check>
-        </eval>
-    </connection>
+        <!--
+          the variable used in this check, in this instance 'threadCount', will be
+          included in the performance data produced from the plugin output.
+          -->
+        <perf />
+      </check>
+    </eval>
+  </connection>
 </jmxeval:jmxeval>
 ----
-//
-//
-//To get started, copy the content from the above sample, and place it in an <nagios-dir>/etc/jmxeval-threadcount.xml or any other location you prefer.
-////
-//Then make sure that you have a JMX enabled Java process is running on your computer (or any other computer that is accessible from yours), and the XML file is updated with the proper url, username and password for the connection. Also make sure that the java.lang:type=Threading MBean is exposed (usually its exposed on all Java processes) using JConsole or VisualVM, and if its not available, update the objectName and attribute to reflect another MBean that is available.
-////
-//Now to test if the jmxeval check works, execute the following command.
-////
-//<nagios-dir>/libexec/check_jmxeval <nagios-dir>/etc/jmxeval-threadcount.xml
-////
-//And it was successful, it should give a output similar to,
-////
-//JMXEval Threads OK - ThreadCount is 23 | threadCount=23;30;40 time=0.0s
-////
-//
-//Configuration explained
-////
-//The jmxeval configuration is supplied as an XML file, which let you configure a simple JMX attribute check to a more advanced checks using multiple JMX attributes/return values from JMX operations, regular expression based status checks and mathematical computations.
-////
-//The XML configuration file is structured as follows.
-////
-//
-//<?xml version="1.0"?>
-//<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2"
-//    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-////
-//  <!--
-//    <connection> to use for evaluations defined under this connection
-//    (multiple connection elements can be used to query multiple processes)
-//   -->
-//  <connection ... >
+
+
+To get started, copy the content from the above sample, and place it in an
+<nagios-dir>/etc/jmxeval-threadcount.xml or any other location you prefer.
+
+Then make sure that you have a JMX enabled Java process is running on your
+computer (or any other computer that is accessible from yours), and the XML
+file is updated with the proper URL,
+username and password for the connection. Also make sure that the
+java.lang:type=Threading MBean is exposed (usually its exposed on all
+Java processes) using JConsole or VisualVM, and if its not available, update
+the objectName and attribute to reflect another MBean that is available.
+
+Now to test if the jmxeval check works, execute the following command.
+
+----
+<nagios-dir>/libexec/check_jmxeval <nagios-dir>/etc/jmxeval-threadcount.xml
+----
+
+And it was successful, it should give a output similar to,
+
+----
+JMXEval Threads OK - ThreadCount is 23 | threadCount=23;30;40 time=0.0s
+----
+
+== Configuration explained
+
+The JMXEval configuration is supplied as an XML file, which let you configure a simple
+JMX attribute check to a more advanced checks using multiple JMX attributes/return values
+from JMX operations, regular expression based status checks and
+mathematical computations.
+
+The XML configuration file is structured as follows.
+
+[source,xml]
+----
+<?xml version="1.0"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <!--
+    <connection> to use for evaluations defined under this connection
+    (multiple connection elements can be used to query multiple processes)
+    -->
+  <connection ... >
 ////
 //    <!--
 //      defines a <eval>uation that will be carried out, which will reported in
@@ -249,26 +267,31 @@ is a sample configuration file you could use for this.
 ////
 //    </eval>
 ////
-//  </connection>
-////
-//</jmxeval:jmxeval>
-////
-//Above is a sample XML which shows all the placements of different elements. If you are familiar with XML Schema definitions, you can refer to XSD at,
-////
-//http://code.google.com/p/jmxeval/source/browse/trunk/src/main/resources/schema/jmxeval-1.2.xsd
-////
-//The XML configuration file is structured to give maximum possible configurability for the checks, most of the elements are not essential for standard usage. For example, a check for one JMX attribute can be written with just a few lines as follows.
-////
-//<?xml version="1.0"?>
-//<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2"
-//    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-//  <connection ... >
-//    <eval ...>
-//      <query ... />
-//      <check ... />
-//    </eval>
-//  </connection>
-//</jmxeval:jmxeval>
+  </connection>
+</jmxeval:jmxeval>
+----
+
+Above is a sample XML which shows all the placements of different
+elements. If you are familiar with XML Schema definitions, you can refer to XSD at
+http://code.google.com/p/jmxeval/source/browse/trunk/src/main/resources/schema/jmxeval-1.2.xsd.
+
+The XML configuration file is structured to give maximum possible configurability
+for the checks, most of the elements are not essential for standard usage.
+For example, a check for one JMX attribute can be written with just a few lines as follows.
+
+[source,xml]
+----
+<?xml version="1.0"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connection ... >
+    <eval ... >
+      <query ... />
+      <check ... />
+    </eval>
+  </connection>
+</jmxeval:jmxeval>
+----
 
 == Configuration elements
 
