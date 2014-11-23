@@ -115,6 +115,7 @@
             <artifactId>asciidoctor-maven-plugin</artifactId>
             <configuration>
               <backend>html</backend>
+              <sourceHighlighter>highlightjs</sourceHighlighter>
             </configuration>
             <executions>
               <execution>
