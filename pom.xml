@@ -17,11 +17,22 @@
     <dep.mockito.version>1.10.8</dep.mockito.version>
 
     <!-- versions of used plugins -->
+    <plug.asciidoctor.version>1.5.0</plug.asciidoctor.version>
     <plug.clean.version>2.5</plug.clean.version>
     <plug.jar.version>2.5</plug.jar.version>
   </properties>
 
   <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.asciidoctor</groupId>
+          <artifactId>asciidoctor-maven-plugin</artifactId>
+          <version>${plug.asciidoctor.version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -93,4 +104,30 @@
       <scope>compile</scope>
     </dependency>
   </dependencies>
+
+  <profiles>
+    <profile>
+      <id>docs</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.asciidoctor</groupId>
+            <artifactId>asciidoctor-maven-plugin</artifactId>
+            <configuration>
+              <backend>html</backend>
+            </configuration>
+            <executions>
+              <execution>
+                <id>output-html</id>
+                <phase>generate-resources</phase>
+                <goals>
+                  <goal>process-asciidoc</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
