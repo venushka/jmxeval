@@ -1,13 +1,16 @@
 package com.adahas.tools.jmxeval.util.test;
 
 import com.adahas.tools.jmxeval.util.NagiosRange;
-import static org.junit.Assert.*;
 
-import org.junit.Test;
+import org.testng.annotations.Test;
 
+import static org.testng.Assert.fail;
+import static org.testng.AssertJUnit.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
+
+@Test
 public class NagiosRangeTest {
 
-  @Test
   public void testNagiosRange() {
     String [] range_specs = {
         "10",
@@ -41,7 +44,6 @@ public class NagiosRangeTest {
     }
   }
 
-  @Test
   public void testBadNagiosRange()
   {
     String [] range_specs = { "20:10", "x", "@x"};
@@ -62,7 +64,6 @@ public class NagiosRangeTest {
     }
   }
   
-  @Test
   public void testIsValueOK() {
     String range_spec = "10:20";
     double[] good_values = {10, 20, 15};
@@ -71,7 +72,6 @@ public class NagiosRangeTest {
     testRangeValues("@"+range_spec, bad_values, good_values);
   }
   
-  @Test
   public void testIsValueOK_NI() {
     String range_spec = "~:0";
     double[] good_values = {Double.NEGATIVE_INFINITY, -2000.1, 0, -0};
@@ -80,7 +80,6 @@ public class NagiosRangeTest {
     testRangeValues("@"+range_spec, bad_values, good_values);    
   }
   
-  @Test
   public void testIsValueOK_PI() {
     String range_spec = "0:~";
     double[] good_values = {Double.POSITIVE_INFINITY, 0, 200.2134};
@@ -91,10 +90,12 @@ public class NagiosRangeTest {
 
   private void testRangeValues(String range_spec, double[] good_values, double[] bad_values) {
     NagiosRange range = new NagiosRange(range_spec);
+
     for (double value:good_values)
     {
       assertTrue("range="+range_spec+" value="+value, range.isValueOK(value));
     }
+
     for (double value:bad_values)
     {
       assertFalse("range="+range_spec+" value="+value, range.isValueOK(value));
