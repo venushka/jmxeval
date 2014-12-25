@@ -11,37 +11,11 @@ import static org.testng.AssertJUnit.assertTrue;
 @Test
 public class NagiosRangeTest {
 
-  public void testNagiosRange() {
-    String [] range_specs = {
-        "10",
-        "10:",
-        "~:10",
-        "10:20",
-        ":10",
-        "10:~",
-        "~:~",
-        ":",
-        ":~",
-        "~:",
-        "",
-        };
-    for (String range_spec:range_specs)
-    {
-      try {
-        NagiosRange range  = new NagiosRange(range_spec);
-      } catch (Exception e) {
-        fail("exception for range:"+range_spec+" message: "+e.getMessage());
-      }
-    }
-    for (String range_spec:range_specs)
-    {
-      range_spec = "@"+range_spec;
-      try {
-        NagiosRange range  = new NagiosRange(range_spec);
-      } catch (Exception e) {
-        fail("exception for range="+range_spec+" message: "+e.getMessage());
-      }
-    }
+  @Test(dataProviderClass = NagiosRangeDataProvider.class, dataProvider = "validRangeSpecifications")
+  public void testNagiosRange(String rangeSpec)
+  {
+    new NagiosRange(rangeSpec);
+    new NagiosRange("@" + rangeSpec);
   }
 
   public void testBadNagiosRange()
