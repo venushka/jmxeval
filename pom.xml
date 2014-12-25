@@ -13,6 +13,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- version information for used dependencies -->
+    <dep.args4j.version>2.0.29</dep.args4j.version>
     <dep.junit.version>4.11</dep.junit.version>
     <dep.mockito.version>1.10.8</dep.mockito.version>
 
@@ -101,7 +102,7 @@
     <dependency>
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
-      <version>2.0.16</version>
+      <version>${dep.args4j.version}</version>
       <scope>compile</scope>
     </dependency>
   </dependencies>
