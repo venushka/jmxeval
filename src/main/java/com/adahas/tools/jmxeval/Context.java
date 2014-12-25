@@ -55,7 +55,7 @@ public class Context {
   /**
    * Constructs the context with given configuration
    * 
-   * @param configFile Configuration elements map
+   * @param config Configuration elements map
    */
   public Context(final Map<String, String> config) {
     this.config = config;
