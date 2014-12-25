@@ -20,7 +20,7 @@ and customizable performance data.
 
 === With Nagios/NRPE
 
-To setup jmxeval with your Nagios/NRPE setup,
+To setup JMXEval with your Nagios/NRPE setup,
 
 . Download the latest version's zip file
 . Unpack the zip file
@@ -33,37 +33,33 @@ To setup jmxeval with your Nagios/NRPE setup,
 Ensure `JAVA_HOME` environment property is set to a valid Java installation,
 or change the `check_jmxeval` or `check_jmxeval.bat` to set the `JAVA_HOME` value.
 
-Run the following command to make sure setup is complete
+Run JMXEval on the command line to make sure setup is complete.
 
-On Linux (or other UNIX based platforms)
-
-//[source, role="console"]
-//----
-//$ <nagios-dir>/libexec/check_jmxeval
-//----
-
-//On Windows
-
-//[source, role="console"]
-//----
-//c:/ <nagios-dir>/libexec/check_jmxeval.bat
-//----
-
-This should print the following on the screen.
-
-[source, role="console"]
+.Running JMXEval on Linux (or other UNIX based platforms)
 ----
+$ <nagios-dir>/libexec/check_jmxeval
+----
+
+.Running JMXEval on Windows
+----
+C:/><nagios-dir>/libexec/check_jmxeval.bat
+----
+
+If you setup is correct this should print the following on the screen:
+
+----
+$ <nagios-dir>/libexec/check_jmxeval
 Syntax: check_jmxeval <filename> [--validate=true [--schema=x.x]]
 ----
 
 == Configuring JMX
 
-To query with JMXEval, you will have to ensure that the Java process that you intend to query
-has JMX enabled. If its already configured, you can skip this section of the document, otherwise you
-can setup JMX on any Java processes (Java 1.5+) as stated in the following link.
-
-
-http://docs.oracle.com/javase/1.5.0/docs/guide/management/agent.html#jmxagent
+To query with JMXEval, you will have to ensure that the Java process that
+you intend to query has JMX enabled. If its already configured, you can skip this
+section of the document, otherwise you can setup JMX on any Java processes
+(Java 1.5+) as stated in the following link.
+(Java 1.5+) as stated in
+http://docs.oracle.com/javase/1.5.0/docs/guide/management/agent.html#jmxagent[Enabling the JMX Agent].
 
 
 Make sure that you refer the correct version of documentation to determine how
@@ -144,18 +140,18 @@ is a sample configuration file you could use for this.
 ----
 
 
-To get started, copy the content from the above sample, and place it in an
-<nagios-dir>/etc/jmxeval-threadcount.xml or any other location you prefer.
+To get started, copy the content from the above sample, and place it in
+`<nagios-dir>/etc/jmxeval-threadcount.xml` or any other location you prefer.
 
 Then make sure that you have a JMX enabled Java process is running on your
 computer (or any other computer that is accessible from yours), and the XML
 file is updated with the proper URL,
 username and password for the connection. Also make sure that the
-java.lang:type=Threading MBean is exposed (usually its exposed on all
+`java.lang:type=Threading MBean` is exposed (usually its exposed on all
 Java processes) using JConsole or VisualVM, and if its not available, update
 the objectName and attribute to reflect another MBean that is available.
 
-Now to test if the jmxeval check works, execute the following command.
+Now to test if the JMXEval check works, execute the following command:
 
 ----
 <nagios-dir>/libexec/check_jmxeval <nagios-dir>/etc/jmxeval-threadcount.xml
@@ -295,73 +291,114 @@ For example, a check for one JMX attribute can be written with just a few lines 
 
 == Configuration elements
 
-//Let us look at each element and what attributes you can configure to implement your jmxeval check.
-//<connection> element
-////
+Let us look at each element and what attributes you can configure to
+implement your JMXEval check.
+
+=== `<connection>` element
+
+
+//
 //The <connection> element will initiate a JMX connection for querying for MBean attributes of executing JMX operations configured within the <connection> element. It supports JMX authentication using username and password, as secured JMX connections over SSL.
-////
+//
 //Configuration attributes available on <connection> element.
-////
+//
 //    url - JMX connection URL. This is a mandatory attribute.
 //    username - Username for authentication.
 //    password - Password for the given username.
 //    ssl - Whether to use SSL for the connection.
-////
+//
 //Here's a few example connection elements.
-////
+//
 // Connection to a Java process running on localhost on port 9010, without authentication.
-////
+//
 //<connection url="service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi">
-////
+//
 //Connection to a Java process running on localhost on port 9010, with authentication.
-////
+//
 //<connection url="service:jmx:rmi:///jndi/rmi://localhost:9010/jmxrmi"
 //    username="myUser" password="myPassword">
-////
+//
 //Connection to a Java process running on host named webserver1.adahas.com on port 9010, with authentication and SSL.
-////
+//
 //<connection url="service:jmx:rmi:///jndi/rmi://webserver1.adahas.com:9010/jmxrmi"
 //    username="myUser" password="myPassword" ssl="true">
-////
-//Connection to a Java process running on host named webserver1.adahas.com having JMX and JNDI services running on two different ports; JMX on port 9010 and 1099. Note that standard JMX configuration will ensure that both services are available on the same port, hence this type of URL will only be needed only if JNDI service has been specifically provided on a different port.
-////
-//<connection url="service:jmx:rmi://webserver1.adahas.com:9010/jndi/rmi://webserver1.adahas.com:1099/jmxrmi">
-////
 //
-//<eval> element
-////
+//Connection to a Java process running on host named webserver1.adahas.com having JMX and JNDI services running on two different ports; JMX on port 9010 and 1099. Note that standard JMX configuration will ensure that both services are available on the same port, hence this type of URL will only be needed only if JNDI service has been specifically provided on a different port.
+//
+//<connection url="service:jmx:rmi://webserver1.adahas.com:9010/jndi/rmi://webserver1.adahas.com:1099/jmxrmi">
+//
+//
+
+=== `<eval>` element
+
+//
 //The <eval> element represents a single check. A check could comprise of <query>ing one or more JMX attributes, <exec>uting one or more JMX operations, performing mathematical <expr>ressions on the acquired values, and checking the values to be in defined warning and critical levels.
-////
+//
 //Configuration attributes available on <eval> element.
-////
+//
 //    name - Name of the check, which will be displayed in the plugin output. This is a mandatory attribute.
 //    host - Regular expression to perfrom on the hostname of the host before executing the check. If the pattern does not match, the check will not be executed. This would be useful if you are using a common XML file to perform multiple checks, where some of them are not applicable for some hosts/
-////
+//
 //A simple check named 'HeapMemory'
-////
+//
 //<eval name="HeapMemory">
 //   ...
 //</eval>
-////
+//
 //A check named 'CacheSize' which should only be performed on hosts where the host name begins with 'cache'
-////
+//
 //<eval name="CacheSize" host="^cache.*">
 //   ...
 //</eval>
-////
 //
-//<query> element
-//<exec> element
-//<expr> element
-//<check> element
-//<perf> element
-//Validating your configuration file
-//Setting variables via command line to be used in the configuration file
-//Troubleshooting
-//Examples
-//Multiple simple attribute checks (Thread count check)
-//Using composite attributes and mathematical expressions (Heap memory usage check)
-//Regular expression based check (Tomcat version check)
-////
+//
+
+=== `<query>` element
+
+NOTE: Section pending.
+
+=== `<exec>` element
+
+NOTE: Section pending.
+
+=== `<expr>` element
+NOTE: Section pending.
+
+=== `<check>` element
+
+NOTE: Section pending.
+
+
+=== `<perf>` element
+
+NOTE: Section pending.
+
+=== Validating your configuration file
+
+NOTE: Section pending.
+
+=== Setting variables via command line to be used in the configuration file
+
+NOTE: Section pending.
+
+== Troubleshooting
+
+NOTE: Section pending.
+
+== Examples
+
+
+=== Multiple simple attribute checks (Thread count check)
+
+NOTE: Section pending.
+
+=== Using composite attributes and mathematical expressions (Heap memory usage check)
+
+NOTE: Section pending.
+
+=== Regular expression based check (Tomcat version check)
+
+NOTE: Section pending.
+
 //
 //TODO Where is a patch for this document at Google Code
