@@ -17,7 +17,7 @@ public class NagiosRange {
    * Construct based on range string
    * 
    * @param range
-   * @throws ConfigurationException if start value is greater than end value
+   * @throws com.adahas.tools.jmxeval.exception.ConfigurationException if start value is greater than end value
    */
   public NagiosRange(String range) {
     //
@@ -62,7 +62,7 @@ public class NagiosRange {
       try {
         start = Double.parseDouble(start_str);
       } catch (NumberFormatException nfe) {
-        throw new BadNagiosRangeException("bad start value:'"+start_str+"' in range:'"+range, nfe);
+        throw new BadNagiosRangeException("Bad start value '"+start_str+"' in range: '"+range+"'", nfe);
       }
     }
 
@@ -76,7 +76,7 @@ public class NagiosRange {
       try {
         end = Double.parseDouble(end_str);
       } catch (NumberFormatException nfe) {
-        throw new BadNagiosRangeException("bad end value:'"+end_str+"' in range:'"+range, nfe);
+        throw new BadNagiosRangeException("Bad end value '"+end_str+"' in range: '"+range+"'", nfe);
       }
     }
     
@@ -85,7 +85,7 @@ public class NagiosRange {
     //
     if (start > end)
     {
-      throw new BadNagiosRangeException("start ("+start+") MUST NOT be greater than end ("+end+")!");
+      throw new BadNagiosRangeException("Range start ("+start+") MUST NOT be greater than end ("+end+")!");
     }
   }
 
