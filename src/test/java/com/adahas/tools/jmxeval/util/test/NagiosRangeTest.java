@@ -18,7 +18,7 @@ public class NagiosRangeTest {
     new NagiosRange("@" + rangeSpec);
   }
 
-  public void testBadNagiosRange()
+  public void badNagiosRangeAreDetected()
   {
     String [] range_specs = { "20:10", "x", "@x"};
     for (String range_spec:range_specs)
@@ -38,7 +38,7 @@ public class NagiosRangeTest {
     }
   }
   
-  public void testIsValueOK() {
+  public void isValueOK() {
     String range_spec = "10:20";
     double[] good_values = {10, 20, 15};
     double[] bad_values  = {9.99, 20.001, -1, 0};
@@ -46,7 +46,7 @@ public class NagiosRangeTest {
     testRangeValues("@"+range_spec, bad_values, good_values);
   }
   
-  public void testIsValueOK_NI() {
+  public void isValueOK_NI() {
     String range_spec = "~:0";
     double[] good_values = {Double.NEGATIVE_INFINITY, -2000.1, 0, -0};
     double[] bad_values  = {Double.POSITIVE_INFINITY, 0.1, 200.2134};
@@ -54,7 +54,7 @@ public class NagiosRangeTest {
     testRangeValues("@"+range_spec, bad_values, good_values);    
   }
   
-  public void testIsValueOK_PI() {
+  public void isValueOK_PI() {
     String range_spec = "0:~";
     double[] good_values = {Double.POSITIVE_INFINITY, 0, 200.2134};
     double[] bad_values  = {Double.NEGATIVE_INFINITY, -2000.1, -0.1};
