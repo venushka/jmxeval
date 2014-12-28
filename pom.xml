@@ -14,7 +14,7 @@
 
     <!-- version information for used dependencies -->
     <dep.args4j.version>2.0.29</dep.args4j.version>
-    <dep.mockito.version>1.10.8</dep.mockito.version>
+    <dep.mockito.version>1.10.17</dep.mockito.version>
     <dep.testng.version>6.8.13</dep.testng.version>
 
     <!-- versions of used plugins -->
