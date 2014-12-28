@@ -18,34 +18,56 @@ public class NagiosRangeTest {
     new NagiosRange("@" + rangeSpec);
   }
 
+  // @todo Overhaul this test, 28.12.2014
   public void badNagiosRangeAreDetected()
   {
     String [] range_specs = { "20:10", "x", "@x"};
     for (String range_spec:range_specs)
     {
       try {
-        NagiosRange range = new NagiosRange(range_spec);
+        new NagiosRange(range_spec);
         fail("no exception generated for bad range="+range_spec);
       } catch (Exception e) {
         // ignored
       }
       try {
-        NagiosRange irange = new NagiosRange("@"+range_spec);
+        new NagiosRange("@"+range_spec);
         fail("no exception generated for bad inverted range="+range_spec);
       } catch (Exception e) {
         // ignored
       }
     }
   }
-  
-  public void isValueOK() {
-    String range_spec = "10:20";
-    double[] good_values = {10, 20, 15};
-    double[] bad_values  = {9.99, 20.001, -1, 0};
-    testRangeValues(range_spec, good_values, bad_values);
-    testRangeValues("@"+range_spec, bad_values, good_values);
+
+  @Test(dataProviderClass = NagiosRangeDataProvider.class, dataProvider = "valuesInRange10U20")
+  public void valuesInExclusiveNagiosRangeAreAccepted(Double value) {
+    NagiosRange range = new NagiosRange("10:20");
+
+    assertTrue(range.isValueOK(value));
   }
-  
+
+  @Test(dataProviderClass = NagiosRangeDataProvider.class, dataProvider = "valuesOutsideRange10U20")
+  public void valuesInInclusiveNagiosRangeAreAccepted(Double value) {
+    NagiosRange range = new NagiosRange("@10:20");
+
+    assertTrue(range.isValueOK(value));
+  }
+
+  @Test(dataProviderClass = NagiosRangeDataProvider.class, dataProvider = "valuesOutsideRange10U20")
+  public void valuesOutsideExclusiveNagiosRangeAreNotAccepted(Double value) {
+    NagiosRange range = new NagiosRange("10:20");
+
+    assertFalse(range.isValueOK(value));
+  }
+
+  @Test(dataProviderClass = NagiosRangeDataProvider.class, dataProvider = "valuesInRange10U20")
+  public void valuesOutsideInclusiveNagiosRangeAreNotAccepted(Double value) {
+    NagiosRange range = new NagiosRange("@10:20");
+
+    assertFalse(range.isValueOK(value));
+  }
+
+  // @todo Overhaul this test, 28.12.2014
   public void isValueOK_NI() {
     String range_spec = "~:0";
     double[] good_values = {Double.NEGATIVE_INFINITY, -2000.1, 0, -0};
@@ -53,7 +75,8 @@ public class NagiosRangeTest {
     testRangeValues(range_spec, good_values, bad_values);
     testRangeValues("@"+range_spec, bad_values, good_values);    
   }
-  
+
+  // @todo Overhaul this test, 28.12.2014
   public void isValueOK_PI() {
     String range_spec = "0:~";
     double[] good_values = {Double.POSITIVE_INFINITY, 0, 200.2134};

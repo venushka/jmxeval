@@ -20,4 +20,18 @@ public class NagiosRangeDataProvider
             {""},
         };
     }
+
+    @DataProvider(name = "valuesInRange10U20")
+    public static Object[][] valuesInRange10U20() {
+        return new Object[][] {
+            {10d}, {20d}, {15d}
+        };
+    }
+
+    @DataProvider(name = "valuesOutsideRange10U20")
+    public static Object[][] valuesOutsideRange10U20() {
+        return new Object[][] {
+            {9.99d}, {20.001d}, {-1d}, {0d}
+        };
+    }
 }
