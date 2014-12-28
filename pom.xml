@@ -9,6 +9,10 @@
   <packaging>jar</packaging>
   <url>http://www.adahas.com/projects/jmxeval</url>
 
+  <prerequisites>
+    <maven>3.0.0</maven>
+  </prerequisites>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
@@ -21,12 +25,18 @@
     <plug.asciidoctor.version>1.5.0</plug.asciidoctor.version>
     <plug.clean.version>2.5</plug.clean.version>
     <plug.jar.version>2.5</plug.jar.version>
+    <plug.surefire.version>2.18</plug.surefire.version>
   </properties>
 
   <build>
     <defaultGoal>install</defaultGoal>
     <pluginManagement>
       <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${plug.surefire.version}</version>
+        </plugin>
         <plugin>
           <groupId>org.asciidoctor</groupId>
           <artifactId>asciidoctor-maven-plugin</artifactId>
