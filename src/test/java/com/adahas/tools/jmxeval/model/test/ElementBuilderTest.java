@@ -4,14 +4,11 @@ import com.adahas.tools.jmxeval.Context;
 import com.adahas.tools.jmxeval.exception.ConfigurationException;
 import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.model.ElementBuilder;
-import org.mockito.Mockito;
-import org.testng.Assert;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.net.URI;
-import java.util.HashMap;
 
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
