@@ -16,37 +16,37 @@ public class PerfData extends Element {
   /**
    * Data label
    */
-  private transient final String label;
+  private final String label;
   
   /**
    * Variable to refer
    */
-  private transient final String var;
+  private final String var;
   
   /**
    * Critical value/level
    */
-  private transient final String critical;
+  private final String critical;
   
   /**
    * Warning value/level
    */
-  private transient final String warning;
+  private final String warning;
   
   /**
    * Minimum value
    */
-  private transient final String min;
+  private final String min;
   
   /**
    * Maximum value
    */
-  private transient final String max;
+  private final String max;
   
   /**
    * Unit of measurement
    */
-  private transient final String unit;
+  private final String unit;
   
   /**
    * Constructs the element

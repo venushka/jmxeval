@@ -21,45 +21,45 @@ import com.adahas.tools.jmxeval.response.Status;
  * Element to configure JMX calls
  */
 public class Exec extends Element implements PerfDataSupport {
-  
+
   /**
    * Variable name
    */
-  private transient final String var;
-  
+  private final String var;
+
   /**
    * MBean object name
    */
-  private transient final String objectName;
-  
+  private final String objectName;
+
   /**
    * MBean operation
    */
-  private transient final String operation;
-  
+  private final String operation;
+
   /**
    * List of arguments
    */
-  private transient final List<String> arguments = new ArrayList<String>();
-  
+  private final List<String> arguments = new ArrayList<>();
+
   /**
    * Constructs the element
-   * 
+   *
    * @param node XML node
    * @param parentElement Parent element
    */
   public Exec(final Node node, final Element parentElement) {
     super(parentElement);
-    
+
     this.var = getNodeAttribute(node, "var");
     this.objectName = getNodeAttribute(node, "objectName");
     this.operation = getNodeAttribute(node, "operation");
-    
+
     for (int i = 1; i < 10; i++) {
     	arguments.add(getNodeAttribute(node, "arg" + i));
     }
   }
-  
+
   /**
    * @see Element#process(Context)
    */
@@ -69,17 +69,17 @@ public class Exec extends Element implements PerfDataSupport {
       if (context.getConnection() == null) {
         throw new EvalException(Status.UNKNOWN, "Can not connect to server");
       }
-      
+
       final ObjectName mbeanName = new ObjectName(objectName);
-      Object returnValue = null;
-      
+      Object returnValue;
+
       final MBeanInfo mbeanInfo = context.getConnection().getMBeanInfo(mbeanName);
       final MBeanOperationInfo[] operationInfo = mbeanInfo.getOperations();
-      
+
       String operationName = null;
       String[] argNames = null;
       Object[] argValues = null;
-      
+
       // find the operation to execute
       for (final MBeanOperationInfo op : operationInfo) {
       	final StringBuilder opSignature = new StringBuilder();
@@ -92,34 +92,34 @@ public class Exec extends Element implements PerfDataSupport {
       		opSignature.append(String.valueOf(op.getSignature()[i].getType()));
       	}
       	opSignature.append(")");
-      	
+
       	if (operation.equals(opSignature.toString())) {
       		operationName = op.getName();
       		argNames = new String[op.getSignature().length];
       		argValues = new Object[op.getSignature().length];
-      		
+
       		for (int i = 0; i < op.getSignature().length; i++) {
       			argNames[i] = op.getSignature()[i].getType();
-      			
-      			if (argNames[i].equals(String.class.getName())) {
+
+      			if ("java.lang.String".equals(argNames[i])) {
       				argValues[i] = arguments.get(i);
-      			} else if (argNames[i].equals("boolean")) {
+      			} else if ("boolean".equals(argNames[i])) {
       				argValues[i] = Boolean.valueOf(arguments.get(i));
-      			} else if (argNames[i].equals("byte")) {
+      			} else if ("byte".equals(argNames[i])) {
       				argValues[i] = Byte.valueOf(arguments.get(i));
-      			} else if (argNames[i].equals("short")) {
+      			} else if ("short".equals(argNames[i])) {
       				argValues[i] = Short.valueOf(arguments.get(i));
-      			} else if (argNames[i].equals("int")) {
+      			} else if ("int".equals(argNames[i])) {
       				argValues[i] = Integer.valueOf(arguments.get(i));
-      			} else if (argNames[i].equals("long")) {
+      			} else if ("long".equals(argNames[i])) {
       				argValues[i] = Long.valueOf(arguments.get(i));
       			}
         	}
-      		
+
       		break;
       	}
       }
-      
+
       if (operationName != null) {
       	returnValue = context.getConnection().invoke(mbeanName, operationName, argValues, argNames);
       } else {
@@ -127,22 +127,19 @@ public class Exec extends Element implements PerfDataSupport {
       }
       // set query result as variable
       context.setVar(var, returnValue);
-      
+
       // process child elements
       super.process(context);
-      
-    } catch (IOException e) {
-      throw new EvalException(Status.UNKNOWN, "Executing operation failed [" + operation + "] on object [" +
-          objectName + "]", e);
-    } catch (JMException e) {
-      throw new EvalException(Status.UNKNOWN, "Executing operation failed [" + operation + "] on object [" +
-          objectName + "]", e);
-    } 
+
+    } catch (IOException | JMException e) {
+      throw new EvalException(Status.UNKNOWN, "Executing operation failed [" + operation + "] on object [" + objectName + "]", e);
+    }
   }
 
   /**
    * @see PerfDataSupport#getVar()
    */
+  @Override
   public String getVar() {
     return var;
   }
@@ -150,6 +147,7 @@ public class Exec extends Element implements PerfDataSupport {
   /**
    * @see PerfDataSupport#getCritical()
    */
+  @Override
   public String getCritical() {
     return null;
   }
@@ -157,6 +155,7 @@ public class Exec extends Element implements PerfDataSupport {
   /**
    * @see PerfDataSupport#getWarning()
    */
+  @Override
   public String getWarning() {
     return null;
   }

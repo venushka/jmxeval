@@ -11,12 +11,11 @@ public class JMXEval extends Element {
 
   /**
    * Constructs the element
-   * 
+   *
    * @param node XML node
    * @param parentElement Parent element
    */
-  @SuppressWarnings("PMD.UnusedFormalParameter")
-  public JMXEval(final Node node, final Element parentElement) {
+  public JMXEval(@SuppressWarnings("unused") final Node node, final Element parentElement) {
     super(parentElement);
   }
 }

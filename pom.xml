@@ -3,29 +3,36 @@
   <modelVersion>4.0.0</modelVersion>
 
   <name>jmxeval</name>
-  <groupId>adahas</groupId>
+  <groupId>com.adahas</groupId>
   <artifactId>jmxeval</artifactId>
-  <version>1.2.7-SNAPSHOT</version>
+  <version>2.0.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>http://www.adahas.com/projects/jmxeval</url>
 
   <prerequisites>
     <maven>3.0.0</maven>
   </prerequisites>
-
+  
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- version information for used dependencies -->
     <dep.args4j.version>2.0.29</dep.args4j.version>
     <dep.mockito.version>1.10.17</dep.mockito.version>
-    <dep.testng.version>6.8.13</dep.testng.version>
+    <dep.junit.version>4.11</dep.junit.version>
 
     <!-- versions of used plugins -->
-    <plug.asciidoctor.version>1.5.0</plug.asciidoctor.version>
-    <plug.clean.version>2.5</plug.clean.version>
-    <plug.jar.version>2.5</plug.jar.version>
-    <plug.surefire.version>2.18</plug.surefire.version>
+    <plugin.asciidoctor.version>1.5.0</plugin.asciidoctor.version>
+    <plugin.clean.version>2.5</plugin.clean.version>
+    <plugin.jar.version>2.5</plugin.jar.version>
+    <plugin.surefire.version>2.18</plugin.surefire.version>
+    <plugin.sonar.version>3.1.1</plugin.sonar.version>
+    
+    <!-- sonar -->
+    <sonar.sources>src/main</sonar.sources>
+    <sonar.tests>src/test</sonar.tests>
+    <sonar.junit.reportsPath>target/surefire-reports</sonar.junit.reportsPath>
+    <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
   </properties>
 
   <build>
@@ -35,14 +42,19 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-surefire-plugin</artifactId>
-          <version>${plug.surefire.version}</version>
+          <version>${plugin.surefire.version}</version>
         </plugin>
         <plugin>
           <groupId>org.asciidoctor</groupId>
           <artifactId>asciidoctor-maven-plugin</artifactId>
-          <version>${plug.asciidoctor.version}</version>
+          <version>${plugin.asciidoctor.version}</version>
         </plugin>
-      </plugins>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>${plugin.sonar.version}</version>
+        </plugin>
+      </plugins>    
     </pluginManagement>
 
     <plugins>
@@ -51,15 +63,15 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.0</version>
         <configuration>
-          <compilerVersion>1.5</compilerVersion>
-          <source>1.5</source>
-          <target>1.5</target>
+          <compilerVersion>1.7</compilerVersion>
+          <source>1.7</source>
+          <target>1.7</target>
         </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-jar-plugin</artifactId>
-        <version>${plug.jar.version}</version>
+        <version>${plugin.jar.version}</version>
         <configuration>
           <archive>
             <manifest>
@@ -68,7 +80,6 @@
           </archive>
         </configuration>
       </plugin>
-
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -89,10 +100,11 @@
         </executions>
       </plugin>
       <plugin>
-	<groupId>org.apache.maven.plugins</groupId>
-	<artifactId>maven-clean-plugin</artifactId>
-	<version>${plug.clean.version}</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-clean-plugin</artifactId>
+        <version>${plugin.clean.version}</version>
       </plugin>
+      
     </plugins>
   </build>
 
@@ -104,9 +116,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.testng</groupId>
-      <artifactId>testng</artifactId>
-      <version>${dep.testng.version}</version>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>${dep.junit.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -141,6 +153,15 @@
           </plugin>
         </plugins>
       </build>
+    </profile>
+    <profile>
+      <id>sonar</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <properties>
+        <sonar.host.url>https://sonarqube.com</sonar.host.url>
+      </properties>
     </profile>
   </profiles>
 </project>

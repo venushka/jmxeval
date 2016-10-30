@@ -19,42 +19,42 @@ import com.adahas.tools.jmxeval.response.Status;
  * Element to configure JMX calls
  */
 public class Query extends Element implements PerfDataSupport {
-  
+
   /**
    * Variable name
    */
-  private transient final String var;
-  
+  private final String var;
+
   /**
    * MBean object name
    */
-  private transient final String objectName;
-  
+  private final String objectName;
+
   /**
    * MBean attribute
    */
-  private transient final String attribute;
-  
+  private final String attribute;
+
   /**
    * Composite MBean attribute name (optional)
    */
-  private transient final String compositeAttribute;
-  
+  private final String compositeAttribute;
+
   /**
    * Constructs the element
-   * 
+   *
    * @param node XML node
    * @param parentElement Parent element
    */
   public Query(final Node node, final Element parentElement) {
     super(parentElement);
-    
+
     this.var = getNodeAttribute(node, "var");
     this.objectName = getNodeAttribute(node, "objectName");
     this.attribute = getNodeAttribute(node, "attribute");
     this.compositeAttribute = getNodeAttribute(node, "compositeAttribute");
   }
-  
+
   /**
    * @see Element#process(Context)
    */
@@ -64,10 +64,10 @@ public class Query extends Element implements PerfDataSupport {
       if (context.getConnection() == null) {
         throw new EvalException(Status.UNKNOWN, "Can not connect to server");
       }
-      
+
       final ObjectName mbeanName = new ObjectName(objectName);
       Object attributeValue;
-      
+
       // retrieve attribute value
       if (compositeAttribute == null) {
         final Object attributeVal = context.getConnection().getAttribute(mbeanName, attribute);
@@ -77,43 +77,46 @@ public class Query extends Element implements PerfDataSupport {
           attributeValue = attributeVal;
         }
       } else {
-        final CompositeDataSupport compositeAttributeValue = 
+        final CompositeDataSupport compositeAttributeValue =
             (CompositeDataSupport) context.getConnection().getAttribute(mbeanName, compositeAttribute);
         attributeValue = compositeAttributeValue.get(attribute);
       }
-    
+
       // set query result as variable
       context.setVar(var, attributeValue);
-      
+
       // process child elements
       super.process(context);
-      
+
     } catch (IOException e) {
       throw new EvalException(Status.UNKNOWN, "Reading attribute failed [" + attribute + "] from object [" +
           objectName + "]" + (compositeAttribute == null ? "" : " composite result [" + compositeAttribute + "]"), e);
     } catch (JMException e) {
       throw new EvalException(Status.UNKNOWN, "Can not read attribute [" + attribute + "] from object [" +
           objectName + "]" + (compositeAttribute == null ? "" : " composite result [" + compositeAttribute + "]"), e);
-    } 
+    }
   }
 
   /**
-   * @see PerfDataSupport#getVar()
+   * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getVar()
    */
+  @Override
   public String getVar() {
     return var;
   }
 
   /**
-   * @see PerfDataSupport#getCritical()
+   * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getCritical()
    */
+  @Override
   public String getCritical() {
     return null;
   }
 
   /**
-   * @see PerfDataSupport#getWarning()
+   * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getWarning()
    */
+  @Override
   public String getWarning() {
     return null;
   }

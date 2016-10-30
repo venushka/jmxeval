@@ -26,35 +26,35 @@ public class Check extends Element implements PerfDataSupport {
     DEFAULT,
     REGEX
   }
-  
+
   /**
    * Variable name
    */
-  private transient final String var;
-  
+  private final String var;
+
   /**
    * Critical value/level
    */
-  private transient final String critical;
-  
+  private final String critical;
+
   /**
    * Warning value/level
    */
-  private transient final String warning;
-  
+  private final String warning;
+
   /**
    * Output message template
    */
-  private transient final String message;
-  
+  private final String message;
+
   /**
    * Critical/Warning level match mode
    */
-  private transient final String mode;
-  
+  private final String mode;
+
   /**
    * Constructs the element
-   * 
+   *
    * @param node Related XML configuration node
    * @param parentElement Parent element
    */
@@ -67,36 +67,36 @@ public class Check extends Element implements PerfDataSupport {
     this.message = getNodeAttribute(node, "message");
     this.mode = getNodeAttribute(node, "mode", "default");
   }
-  
+
   /**
    * @see Element#process(Context)
    */
   @Override
   public void process(final Context context) throws EvalException {
-    
+
     Status status;
-    
+
     final Object attributeValue = context.getVar(var);
     if (attributeValue == null) {
       status = Status.UNKNOWN;
     } else {
-      status = getStatus(attributeValue, critical, warning, 
+      status = getStatus(attributeValue, critical, warning,
           Mode.valueOf(mode.toUpperCase(Locale.ENGLISH)));
     }
-    
+
     final String outputMessage = replaceWithVars(context, message);
-    
+
     // set results to context
     final String evalName = ((Eval) getParentElement()).getName();
     context.getResponse().addEvalResult(new EvalResult(evalName, status, outputMessage));
-    
+
     // process child elements
     super.process(context);
   }
-  
+
   /**
    * Get the status given a check result value
-   * 
+   *
    * @param value Value to check
    * @param criticalLevel Critical value level
    * @param warningLevel Warning value level
@@ -105,111 +105,108 @@ public class Check extends Element implements PerfDataSupport {
    */
   protected Status getStatus(final Object value, final String criticalLevel,
       final String warningLevel, final Mode mode) {
-    
-    Status resultStatus; 
-    
+
+    Status resultStatus;
+
     if (mode.equals(Mode.REGEX)) {
       resultStatus = getStatusInRegExMode(value, criticalLevel, warningLevel);
     } else {
       resultStatus = getStatusInDefaultMode(value, criticalLevel, warningLevel);
     }
-    
+
     return resultStatus;
   }
-  
+
   /**
    * Get the status given a check result value based on regex mode
-   * 
+   *
    * @param value Value to check
    * @param criticalLevel Critical value level
    * @param warningLevel Warning value level
    * @return Status of the check
    */
-  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   protected Status getStatusInRegExMode(final Object value, final String criticalLevel, final String warningLevel) {
-    Status resultStatus = null; 
-    
+    Status resultStatus = null;
+
     if (criticalLevel != null) {
       // critical level
       final Pattern pattern = Pattern.compile(criticalLevel);
       final Matcher matcher = pattern.matcher(value.toString());
-      
+
       if (matcher.matches()) {
         resultStatus = Status.CRITICAL;
       }
     }
-    
+
     if (warningLevel != null && resultStatus == null) {
       // warning level (if not critical status already set
       final Pattern pattern = Pattern.compile(warningLevel);
       final Matcher matcher = pattern.matcher(value.toString());
-      
+
       if (matcher.matches()) {
         resultStatus = Status.WARNING;
       }
     }
-    
+
     // return OK nothing matches
     if (resultStatus == null) {
-      resultStatus = Status.OK; 
+      resultStatus = Status.OK;
     }
-    
+
     return resultStatus;
   }
-  
+
   /**
    * Get the status given a check result value based on default mode
-   * 
+   *
    * @param value Value to check
    * @param criticalLevel Critical value level
    * @param warningLevel Warning value level
    * @return Status of the check
    */
-  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   protected Status getStatusInDefaultMode(final Object value, final String criticalLevel, final String warningLevel) {
     Status resultStatus = Status.OK;
-    
+
     // if
     // - either levels are null, try an exact match
     // - if neither are null and not a number,
     if (criticalLevel == null || warningLevel == null || !(value instanceof Number)) {
-      
+
       // give critical level higher priority
       if (criticalLevel != null && criticalLevel.equals(value.toString())) {
         resultStatus = Status.CRITICAL;
-     
+
       } else if (warningLevel != null && warningLevel.equals(value.toString())) {
         resultStatus = Status.WARNING;
       }
-      
+
     } else {
       resultStatus = getStatusByRangeCheck(value, criticalLevel, warningLevel);
     }
-    
+
     // return OK nothing matches
     return resultStatus;
   }
-  
+
   /**
    * Get the status given a check result value within ranges (only for numerical values)
-   * 
+   *
    * @param value Value to check
    * @param criticalLevel Critical value level
    * @param warningLevel Warning value level
    * @return Status of the check
    */
-  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
   protected Status getStatusByRangeCheck(final Object value, final String criticalLevel, final String warningLevel) {
     Status resultStatus = Status.OK;
-    
+
     // range check for numerics
     final Double doubleValue = ((Number) value).doubleValue();
-    NagiosRange critical = new NagiosRange(criticalLevel);
-    NagiosRange warning  = new NagiosRange(warningLevel);
-    
-    if (!critical.isValueOK(doubleValue)) {
+    final NagiosRange criticalRange = new NagiosRange(criticalLevel);
+    final NagiosRange warningRange  = new NagiosRange(warningLevel);
+
+    if (!criticalRange.isValueOK(doubleValue)) {
       resultStatus = Status.CRITICAL;
-    } else if (!warning.isValueOK(doubleValue)) {
+    } else if (!warningRange.isValueOK(doubleValue)) {
       resultStatus = Status.WARNING;
     }
     return resultStatus;
@@ -218,6 +215,7 @@ public class Check extends Element implements PerfDataSupport {
   /**
    * @see PerfDataSupport#getVar()
    */
+  @Override
   public String getVar() {
     return var;
   }
@@ -225,6 +223,7 @@ public class Check extends Element implements PerfDataSupport {
   /**
    * @see PerfDataSupport#getCritical()
    */
+  @Override
   public String getCritical() {
     return critical;
   }
@@ -232,6 +231,7 @@ public class Check extends Element implements PerfDataSupport {
   /**
    * @see PerfDataSupport#getWarning()
    */
+  @Override
   public String getWarning() {
     return warning;
   }
