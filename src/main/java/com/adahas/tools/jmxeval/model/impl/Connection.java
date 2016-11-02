@@ -11,7 +11,7 @@ import javax.management.remote.JMXConnectorFactory;
 import javax.management.remote.JMXServiceURL;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
-import org.mockito.internal.util.io.IOUtil;
+import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
@@ -95,7 +95,7 @@ public class Connection extends Element {
         // process elements even if the connection origination fails
         super.process();
       } finally {
-        IOUtil.closeQuietly(jmxConnector);
+        IOUtils.closeQuietly(jmxConnector);
       }
     }
   }
