@@ -7,10 +7,10 @@ import javax.management.MBeanServerConnection;
 
 import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.Option;
+import org.kohsuke.args4j.spi.BooleanOptionHandler;
 
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 import com.adahas.tools.jmxeval.response.Response;
-import com.adahas.tools.jmxeval.response.Status;
 
 /**
  * Execution context
@@ -18,19 +18,28 @@ import com.adahas.tools.jmxeval.response.Status;
 public class Context {
 
   /**
-   * Filename parameter name
+   * Filename.
    */
-  public static final String CONFIG_FILENAME = "filename";
+  @Argument(metaVar = "<filename>", required = true)
+  private String filename;
 
   /**
-   * Validation parameter name
+   * Run with verbose logging.
    */
-  public static final String CONFIG_VALIDATE = "validate";
+  @Option(name = "--verbose", handler = BooleanOptionHandler.class, usage = "run with verbose output (note: only use for debugging issues by running the plugin manually)")
+  private boolean verbose;
 
   /**
-   * Schema parameter name
+   * Validate input file with schema.
    */
-  public static final String CONFIG_SCHEMA = "schema";
+  @Option(name = "--validate", handler = BooleanOptionHandler.class, usage = "turn validation on")
+  private boolean validate;
+
+  /**
+   * Schema version.
+   */
+  @Option(name = "--schema", metaVar = "<version>", usage = "set schema version")
+  private String schemaVersion;
 
   /**
    * JMX server connection
@@ -43,33 +52,9 @@ public class Context {
   private final Map<String, Object> variables = new HashMap<>();
 
   /**
-   * Configuration values
-   */
-  private final Map<String, String> config;
-
-  /**
    * Response
    */
   private final Response response = new Response();
-
-  /**
-   * Constructs the context with given configuration
-   *
-   * @param config Configuration elements map
-   */
-  public Context(final Map<String, String> config) {
-    this.config = config;
-  }
-
-  /**
-   * Get a configuration parameter value
-   *
-   * @param key Configuration parameter key
-   * @return Configuration parameter value
-   */
-  public String getConfigValue(final String key) {
-    return config.get(key);
-  }
 
   /**
    * Get the response instance
@@ -103,11 +88,11 @@ public class Context {
    *
    * @param name Name of the variable
    * @param value Value of the variable
-   * @throws EvalException When the variable is already defined or is having a reserved name as its variable name
+   * @throws JMXEvalException When the variable is already defined or is having a reserved name as its variable name
    */
-  public void setVar(final String name, final Object value) throws EvalException {
+  public void setVar(final String name, final Object value) throws JMXEvalException {
     if (variables.containsKey(name)) {
-      throw new EvalException(Status.UNKNOWN, "Variable already set: " + name);
+      throw new JMXEvalException("Variable already set: " + name);
     } else {
       variables.put(name, value);
     }
@@ -118,9 +103,8 @@ public class Context {
    *
    * @param name Name of the variable with optional : separated default value.
    * @return Value of the variable
-   * @throws EvalException When the variable is not set and no default is provided
    */
-  public Object getVar(final String name) throws EvalException {
+  public Object getVar(final String name) {
     String key = name;
     String defaultValue = null;
     final int seperator = name.indexOf(':');
@@ -130,54 +114,63 @@ public class Context {
     }
     if (variables.containsKey(key)) {
       return variables.get(key);
+    } else if (System.getProperties().containsKey(key)) {
+      return System.getProperty(key);
     } else if (defaultValue != null) {
       return defaultValue;
     } else {
-      throw new EvalException(Status.UNKNOWN, "Variable not set: " + name);
+      return null;
     }
   }
 
   /**
-   * Set 'validate' parameter value.
-   *
-   * @param value Value of the 'validate' parameter
-   */
-  @Option(name = "--" + CONFIG_VALIDATE, metaVar = "<boolean>", usage = "set validation true|false, default is false")
-  protected void setConfigValidate(final String value) {
-    config.put(CONFIG_VALIDATE, value);
-  }
-
-  /**
-   * Set 'validate' parameter value.
-   *
-   * @param value Value of the 'validate' parameter
-   */
-  @Option(name = "--" + CONFIG_SCHEMA, metaVar = "<version>", usage = "set schema version")
-  protected void setConfigSchema(final String value) {
-    config.put(CONFIG_SCHEMA, value);
-  }
-
-  /**
-   * Set 'define' parameter value.
+   * Set parameter value passed as key=value pair.
    *
    * @param value Value of the 'define' parameter
    */
   @Option(name = "--set", aliases = { "--define" }, metaVar = "<name=value>", usage = "set variable name to value")
-  protected void setDefine(final String nameValue) throws EvalException {
-    final String[] tokens = nameValue.split("=", 2);
-    if (tokens.length != 2) {
-      throw new EvalException(Status.UNKNOWN, "arg to --set (" + nameValue + ") must be in \"name=value\" format!");
+  public void setVar(final String nameValue) throws JMXEvalException {
+    final int separatorIndex = nameValue.indexOf('=');
+    if (separatorIndex > 0) {
+      setVar(nameValue.substring(0, separatorIndex), nameValue.substring(separatorIndex + 1));
+    } else {
+      throw new JMXEvalException("arg to --set (" + nameValue + ") must be in \"name=value\" format!");
     }
-    setVar(tokens[0], tokens[1]);
   }
 
   /**
-   * Set filename parameter.
+   * Get the filename.
    *
-   * @param value File name
+   * @return the filename
    */
-  @Argument (metaVar = "<filename>", required = true)
-  protected void setConfigFilename(final String value) {
-    config.put(CONFIG_FILENAME, value);
+  public String getFilename() {
+    return filename;
+  }
+
+  /**
+   * Use verbose logging.
+   *
+   * @return the verbose
+   */
+  public boolean isVerbose() {
+    return verbose;
+  }
+
+  /**
+   * Validate input file against schema.
+   *
+   * @return the validate
+   */
+  public boolean isValidate() {
+    return validate;
+  }
+
+  /**
+   * Get the schema version.
+   *
+   * @return the schemaVersion
+   */
+  public String getSchemaVersion() {
+    return schemaVersion;
   }
 }

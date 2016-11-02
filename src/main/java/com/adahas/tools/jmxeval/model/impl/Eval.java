@@ -2,12 +2,14 @@ package com.adahas.tools.jmxeval.model.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.response.EvalResult;
 import com.adahas.tools.jmxeval.response.Status;
@@ -17,27 +19,29 @@ import com.adahas.tools.jmxeval.response.Status;
  */
 public class Eval extends Element {
 
+  private static final Logger log = Logger.getLogger(Eval.class.getName());
+
   /**
    * Name of the eval
    */
-  private final String name;
+  private final Field name;
 
   /**
    * Host name pattern to match before evaluating
    */
-  private final String host;
+  private final Field host;
 
   /**
    * Constructs the element
    *
+   * @param context Execution context
    * @param node XML node
-   * @param parentElement Parent element
    */
-  public Eval(final Node node, final Element parentElement) {
-    super(parentElement);
+  public Eval(final Context context, final Node node) {
+    super(context);
 
-    this.name = getNodeAttribute(node, "name");
-    this.host = getNodeAttribute(node, "host", ".*");
+    this.name = getNodeAttr(node, "name");
+    this.host = getNodeAttr(node, "host", ".*");
   }
 
   /**
@@ -45,7 +49,7 @@ public class Eval extends Element {
    *
    * @return the name
    */
-  public String getName() {
+  public Field getName() {
     return name;
   }
 
@@ -54,29 +58,28 @@ public class Eval extends Element {
    *
    * @return the host
    */
-  public String getHost() {
+  public Field getHost() {
     return host;
   }
 
   /**
-   * @see Element#process(Context)
+   * @see Element#process()
    */
   @Override
-  public void process(final Context context) throws EvalException {
+  public void process() throws JMXEvalException {
     try {
       final String hostname = InetAddress.getLocalHost().getHostName();
 
-      if (Pattern.matches(host, hostname)) {
+      if (Pattern.matches(host.get(), hostname)) {
         // process child elements
-        super.process(context);
+        super.process();
       }
 
-    } catch (EvalException e) {
-      context.getResponse().addEvalResult(new EvalResult(name, e.getStatus(), e.getMessage()));
+    } catch (JMXEvalException | RuntimeException | UnknownHostException e) {
+      log.log(Level.SEVERE, e.getMessage(), e);
 
-    } catch (RuntimeException | UnknownHostException e) {
-      context.getResponse().addEvalResult(new EvalResult(
-          name, Status.UNKNOWN, e.getMessage() + " [" + e.getClass().getName() + "]"));
+      // add the evaluation failure to the response
+      context.getResponse().addEvalResult(new EvalResult(name.get(), Status.UNKNOWN, e.getMessage() + " [" + e.getClass().getName() + "]"));
     }
   }
 }

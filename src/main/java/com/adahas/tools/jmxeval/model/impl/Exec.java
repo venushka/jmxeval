@@ -12,10 +12,9 @@ import javax.management.ObjectName;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.model.PerfDataSupport;
-import com.adahas.tools.jmxeval.response.Status;
 
 /**
  * Element to configure JMX calls
@@ -25,114 +24,135 @@ public class Exec extends Element implements PerfDataSupport {
   /**
    * Variable name
    */
-  private final String var;
+  private final Field var;
 
   /**
    * MBean object name
    */
-  private final String objectName;
+  private final Field objectName;
 
   /**
    * MBean operation
    */
-  private final String operation;
+  private final Field operation;
 
   /**
    * List of arguments
    */
-  private final List<String> arguments = new ArrayList<>();
+  private final List<Field> arguments = new ArrayList<>();
 
   /**
    * Constructs the element
    *
+   * @param context Execution context
    * @param node XML node
-   * @param parentElement Parent element
    */
-  public Exec(final Node node, final Element parentElement) {
-    super(parentElement);
+  public Exec(final Context context, final Node node) {
+    super(context);
 
-    this.var = getNodeAttribute(node, "var");
-    this.objectName = getNodeAttribute(node, "objectName");
-    this.operation = getNodeAttribute(node, "operation");
+    this.var = getNodeAttr(node, "var");
+    this.objectName = getNodeAttr(node, "objectName");
+    this.operation = getNodeAttr(node, "operation");
 
     for (int i = 1; i < 10; i++) {
-    	arguments.add(getNodeAttribute(node, "arg" + i));
+      arguments.add(getNodeAttr(node, "arg" + i));
     }
   }
 
   /**
-   * @see Element#process(Context)
+   * @see Element#process()
    */
   @Override
-  public void process(final Context context) throws EvalException {
+  public void process() throws JMXEvalException {
     try {
       if (context.getConnection() == null) {
-        throw new EvalException(Status.UNKNOWN, "Can not connect to server");
+        throw new JMXEvalException("Could not connect to server");
       }
 
-      final ObjectName mbeanName = new ObjectName(objectName);
-      Object returnValue;
-
+      final ObjectName mbeanName = new ObjectName(objectName.get());
       final MBeanInfo mbeanInfo = context.getConnection().getMBeanInfo(mbeanName);
-      final MBeanOperationInfo[] operationInfo = mbeanInfo.getOperations();
-
-      String operationName = null;
-      String[] argNames = null;
-      Object[] argValues = null;
+      final MBeanOperationInfo[] operationInfoArr = mbeanInfo.getOperations();
 
       // find the operation to execute
-      for (final MBeanOperationInfo op : operationInfo) {
-      	final StringBuilder opSignature = new StringBuilder();
-      	opSignature.append(op.getName());
-      	opSignature.append("(");
-      	for (int i = 0; i < op.getSignature().length; i++) {
-      	  if (i > 0) {
-      	    opSignature.append(",");
-      	  }
-      		opSignature.append(String.valueOf(op.getSignature()[i].getType()));
-      	}
-      	opSignature.append(")");
-
-      	if (operation.equals(opSignature.toString())) {
-      		operationName = op.getName();
-      		argNames = new String[op.getSignature().length];
-      		argValues = new Object[op.getSignature().length];
-
-      		for (int i = 0; i < op.getSignature().length; i++) {
-      			argNames[i] = op.getSignature()[i].getType();
-
-      			if ("java.lang.String".equals(argNames[i])) {
-      				argValues[i] = arguments.get(i);
-      			} else if ("boolean".equals(argNames[i])) {
-      				argValues[i] = Boolean.valueOf(arguments.get(i));
-      			} else if ("byte".equals(argNames[i])) {
-      				argValues[i] = Byte.valueOf(arguments.get(i));
-      			} else if ("short".equals(argNames[i])) {
-      				argValues[i] = Short.valueOf(arguments.get(i));
-      			} else if ("int".equals(argNames[i])) {
-      				argValues[i] = Integer.valueOf(arguments.get(i));
-      			} else if ("long".equals(argNames[i])) {
-      				argValues[i] = Long.valueOf(arguments.get(i));
-      			}
-        	}
-
-      		break;
-      	}
+      MBeanOperationInfo operationInfo = null;
+      for (final MBeanOperationInfo op : operationInfoArr) {
+        if (getSignature(op).equals(operation.get().replaceAll(" ", ""))) {
+          operationInfo = op;
+          break;
+        }
       }
 
-      if (operationName != null) {
-      	returnValue = context.getConnection().invoke(mbeanName, operationName, argValues, argNames);
-      } else {
-      	throw new EvalException(Status.UNKNOWN, "Could not locate the operation: [" + operation + "]");
+      if (operationInfo == null) {
+        throw new JMXEvalException("Could not find the operation: [" + operation + "]");
       }
+
+      // prepare arguments
+      final String operationName = operationInfo.getName();
+      final String[] argTypes = new String[operationInfo.getSignature().length];
+      final Object[] argValues = new Object[operationInfo.getSignature().length];
+
+      for (int i = 0; i < operationInfo.getSignature().length; i++) {
+        argTypes[i] = operationInfo.getSignature()[i].getType();
+        argValues[i] = getValue(argTypes[i], arguments.get(i).get());
+      }
+
+      // invoke the method
+      final Object returnValue = context.getConnection().invoke(mbeanName, operationName, argValues, argTypes);
+
       // set query result as variable
-      context.setVar(var, returnValue);
+      context.setVar(var.get(), returnValue);
 
       // process child elements
-      super.process(context);
+      super.process();
 
     } catch (IOException | JMException e) {
-      throw new EvalException(Status.UNKNOWN, "Executing operation failed [" + operation + "] on object [" + objectName + "]", e);
+      throw new JMXEvalException("Executing operation failed [" + operation + "] on object [" + objectName + "]", e);
+    }
+  }
+
+  /**
+   * Get the signature of a {@link MBeanOperationInfo}.
+   *
+   * @param operationInfo MBean operation
+   * @return the method signature
+   */
+  private String getSignature(final MBeanOperationInfo operationInfo) {
+    final StringBuilder signature = new StringBuilder();
+    signature.append(operationInfo.getName());
+    signature.append("(");
+    for (int i = 0; i < operationInfo.getSignature().length; i++) {
+      if (i > 0) {
+        signature.append(",");
+      }
+      signature.append(String.valueOf(operationInfo.getSignature()[i].getType()));
+    }
+    signature.append(")");
+    return signature.toString();
+  }
+
+  /**
+   * Convert argument values to the appropriate data type.
+   *
+   * @param argType Type of the argument
+   * @param argValue String value of the argument
+   * @return argument value in the specified type
+   * @throws JMXEvalException if the type is not supported
+   */
+  private Object getValue(final String argType, final String argValue) throws JMXEvalException { // NOSONAR Each data type needs to be mapped, and this is the simplest way of mapping
+    if ("java.lang.String".equals(argType)) {
+      return argValue;
+    } else if ("boolean".equals(argType)) {
+      return Boolean.valueOf(argValue);
+    } else if ("byte".equals(argType)) {
+      return Byte.valueOf(argValue);
+    } else if ("short".equals(argType)) {
+      return Short.valueOf(argValue);
+    } else if ("int".equals(argType)) {
+      return Integer.valueOf(argValue);
+    } else if ("long".equals(argType)) {
+      return Long.valueOf(argValue);
+    } else {
+      throw new JMXEvalException("Unsupported argument type: " + argType);
     }
   }
 
@@ -140,7 +160,7 @@ public class Exec extends Element implements PerfDataSupport {
    * @see PerfDataSupport#getVar()
    */
   @Override
-  public String getVar() {
+  public Field getVar() {
     return var;
   }
 
@@ -148,15 +168,15 @@ public class Exec extends Element implements PerfDataSupport {
    * @see PerfDataSupport#getCritical()
    */
   @Override
-  public String getCritical() {
-    return null;
+  public Field getCritical() {
+    return literalNull();
   }
 
   /**
    * @see PerfDataSupport#getWarning()
    */
   @Override
-  public String getWarning() {
-    return null;
+  public Field getWarning() {
+    return literalNull();
   }
 }

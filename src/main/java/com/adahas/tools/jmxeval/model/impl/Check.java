@@ -7,7 +7,7 @@ import java.util.regex.Pattern;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.model.PerfDataSupport;
 import com.adahas.tools.jmxeval.response.EvalResult;
@@ -28,70 +28,72 @@ public class Check extends Element implements PerfDataSupport {
   }
 
   /**
+   * Eval name
+   */
+  private final Field eval;
+
+  /**
    * Variable name
    */
-  private final String var;
+  private final Field var;
 
   /**
    * Critical value/level
    */
-  private final String critical;
+  private final Field critical;
 
   /**
    * Warning value/level
    */
-  private final String warning;
+  private final Field warning;
 
   /**
    * Output message template
    */
-  private final String message;
+  private final Field message;
 
   /**
    * Critical/Warning level match mode
    */
-  private final String mode;
+  private final Field mode;
 
   /**
    * Constructs the element
    *
+   * @param context Execution context
    * @param node Related XML configuration node
    * @param parentElement Parent element
    */
-  public Check(final Node node, final Element parentElement) {
-    super(parentElement);
+  public Check(final Context context, final Node node, final Element parentElement) {
+    super(context);
 
-    this.var = getNodeAttribute(node, "useVar");
-    this.critical = getNodeAttribute(node, "critical");
-    this.warning = getNodeAttribute(node, "warning");
-    this.message = getNodeAttribute(node, "message");
-    this.mode = getNodeAttribute(node, "mode", "default");
+    this.eval = ((Eval) parentElement).getName();
+    this.var = getNodeAttr(node, "useVar");
+    this.critical = getNodeAttr(node, "critical");
+    this.warning = getNodeAttr(node, "warning");
+    this.message = getNodeAttr(node, "message");
+    this.mode = getNodeAttr(node, "mode", "default");
   }
 
   /**
-   * @see Element#process(Context)
+   * @see Element#process()
    */
   @Override
-  public void process(final Context context) throws EvalException {
-
+  public void process() throws JMXEvalException {
     Status status;
 
-    final Object attributeValue = context.getVar(var);
-    if (attributeValue == null) {
+    final Object valueToCheck = context.getVar(var.get());
+    if (valueToCheck == null) {
       status = Status.UNKNOWN;
     } else {
-      status = getStatus(attributeValue, critical, warning,
-          Mode.valueOf(mode.toUpperCase(Locale.ENGLISH)));
+      status = getStatus(valueToCheck, critical.get(), warning.get(), Mode.valueOf(mode.get().toUpperCase(Locale.ENGLISH)));
     }
 
-    final String outputMessage = replaceWithVars(context, message);
-
     // set results to context
-    final String evalName = ((Eval) getParentElement()).getName();
-    context.getResponse().addEvalResult(new EvalResult(evalName, status, outputMessage));
+    context.getResponse().addEvalResult(new EvalResult(eval.get(), status, message.get()));
 
     // process child elements
-    super.process(context);
+    super.process();
   }
 
   /**
@@ -102,10 +104,9 @@ public class Check extends Element implements PerfDataSupport {
    * @param warningLevel Warning value level
    * @param mode Check mode
    * @return Status of the check
+   * @throws JMXEvalException if evaluation fails
    */
-  protected Status getStatus(final Object value, final String criticalLevel,
-      final String warningLevel, final Mode mode) {
-
+  protected Status getStatus(final Object value, final String criticalLevel, final String warningLevel, final Mode mode) throws JMXEvalException {
     Status resultStatus;
 
     if (mode.equals(Mode.REGEX)) {
@@ -163,8 +164,9 @@ public class Check extends Element implements PerfDataSupport {
    * @param criticalLevel Critical value level
    * @param warningLevel Warning value level
    * @return Status of the check
+   * @throws JMXEvalException if evaluation fails
    */
-  protected Status getStatusInDefaultMode(final Object value, final String criticalLevel, final String warningLevel) {
+  protected Status getStatusInDefaultMode(final Object value, final String criticalLevel, final String warningLevel) throws JMXEvalException {
     Status resultStatus = Status.OK;
 
     // if
@@ -175,7 +177,6 @@ public class Check extends Element implements PerfDataSupport {
       // give critical level higher priority
       if (criticalLevel != null && criticalLevel.equals(value.toString())) {
         resultStatus = Status.CRITICAL;
-
       } else if (warningLevel != null && warningLevel.equals(value.toString())) {
         resultStatus = Status.WARNING;
       }
@@ -195,8 +196,9 @@ public class Check extends Element implements PerfDataSupport {
    * @param criticalLevel Critical value level
    * @param warningLevel Warning value level
    * @return Status of the check
+   * @throws JMXEvalException if evaluation fails
    */
-  protected Status getStatusByRangeCheck(final Object value, final String criticalLevel, final String warningLevel) {
+  protected Status getStatusByRangeCheck(final Object value, final String criticalLevel, final String warningLevel) throws JMXEvalException {
     Status resultStatus = Status.OK;
 
     // range check for numerics
@@ -204,9 +206,9 @@ public class Check extends Element implements PerfDataSupport {
     final NagiosRange criticalRange = new NagiosRange(criticalLevel);
     final NagiosRange warningRange  = new NagiosRange(warningLevel);
 
-    if (!criticalRange.isValueOK(doubleValue)) {
+    if (!criticalRange.isInRange(doubleValue)) {
       resultStatus = Status.CRITICAL;
-    } else if (!warningRange.isValueOK(doubleValue)) {
+    } else if (!warningRange.isInRange(doubleValue)) {
       resultStatus = Status.WARNING;
     }
     return resultStatus;
@@ -216,7 +218,7 @@ public class Check extends Element implements PerfDataSupport {
    * @see PerfDataSupport#getVar()
    */
   @Override
-  public String getVar() {
+  public Field getVar() {
     return var;
   }
 
@@ -224,7 +226,7 @@ public class Check extends Element implements PerfDataSupport {
    * @see PerfDataSupport#getCritical()
    */
   @Override
-  public String getCritical() {
+  public Field getCritical() {
     return critical;
   }
 
@@ -232,7 +234,7 @@ public class Check extends Element implements PerfDataSupport {
    * @see PerfDataSupport#getWarning()
    */
   @Override
-  public String getWarning() {
+  public Field getWarning() {
     return warning;
   }
 }

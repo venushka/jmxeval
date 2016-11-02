@@ -3,7 +3,7 @@ package com.adahas.tools.jmxeval.model.impl;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.model.PerfDataSupport;
 import com.adahas.tools.jmxeval.util.ExprEval;
@@ -16,56 +16,55 @@ public class Expr extends Element implements PerfDataSupport {
   /**
    * Variable name
    */
-  private final String var;
+  private final Field var;
 
   /**
    * Expression string
    */
-  private final String expression;
+  private final Field expression;
 
   /**
    * Scale for output value
    */
-  private final String scale;
+  private final Field scale;
 
   /**
    * Constructs the element
    *
+   * @param context Execution context
    * @param node XML node
-   * @param parentElement Parent element
    */
-  public Expr(final Node node, final Element parentElement) {
-    super(parentElement);
+  public Expr(final Context context, final Node node) {
+    super(context);
 
-    this.var = getNodeAttribute(node, "var");
-    this.expression = getNodeAttribute(node, "expression");
-    this.scale = getNodeAttribute(node, "scale");
+    this.var = getNodeAttr(node, "var");
+    this.expression = getNodeAttr(node, "expression");
+    this.scale = getNodeAttr(node, "scale");
   }
 
   /**
-   * @see Element#process(Context)
+   * @see Element#process()
    */
   @Override
-  public void process(final Context context) throws EvalException {
-
-    final ExprEval exprEval = new ExprEval(replaceWithVars(context, expression));
+  public void process() throws JMXEvalException {
+    final ExprEval exprEval = new ExprEval(expression.get());
     if (scale != null) {
-      exprEval.setScale(Integer.parseInt(scale));
+      exprEval.setScale(Integer.parseInt(scale.get()));
     }
     final Object result = exprEval.evaluate();
 
     // set result variable
-    context.setVar(var, result);
+    context.setVar(var.get(), result);
 
     // process child elements
-    super.process(context);
+    super.process();
   }
 
   /**
    * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getVar()
    */
   @Override
-  public String getVar() {
+  public Field getVar() {
     return var;
   }
 
@@ -73,15 +72,15 @@ public class Expr extends Element implements PerfDataSupport {
    * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getCritical()
    */
   @Override
-  public String getCritical() {
-    return null;
+  public Field getCritical() {
+    return literalNull();
   }
 
   /**
    * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getWarning()
    */
   @Override
-  public String getWarning() {
-    return null;
+  public Field getWarning() {
+    return literalNull();
   }
 }

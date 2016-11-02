@@ -36,12 +36,13 @@ public class NagiosRangeTest {
       { "", true },
       { "20:10", false },
       { "x", false },
-      { "@x", false }
+      { "@x", false },
+      { "x:y", false }
     });
   }
 
   @Test
-  public void testRange() {
+  public void testRange() throws Exception {
     if (verifyValid) {
       new NagiosRange(rangeSpec);
       new NagiosRange("@" + rangeSpec);

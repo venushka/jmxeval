@@ -85,7 +85,6 @@ public class Response {
 
       format.close();
     } else if (evalResults.size() == 1) {
-
       builder.append(evalResults.get(0));
     }
 
@@ -130,7 +129,7 @@ public class Response {
 
     if (!perfDataValues.isEmpty()) {
       builder.append(" |");
-      for (PerfDataResult perfData : perfDataValues) {
+      for (final PerfDataResult perfData : perfDataValues) {
         builder.append(" ");
         builder.append(perfData);
       }

@@ -61,19 +61,19 @@ public class NagiosRangeValueTest {
   }
 
   @Test
-  public void testValue() {
+  public void testValue() throws Exception {
     final NagiosRange range = new NagiosRange(rangeSpec);
     if (verifyValid) {
-      assertTrue("range=" + rangeSpec + " value=" + value, range.isValueOK(value));
+      assertTrue("range=" + rangeSpec + " value=" + value, range.isInRange(value));
     } else {
-      assertFalse("range=" + rangeSpec + " value=" + value, range.isValueOK(value));
+      assertFalse("range=" + rangeSpec + " value=" + value, range.isInRange(value));
     }
 
     final NagiosRange rangeExcl = new NagiosRange("@" + rangeSpec);
     if (verifyValid) {
-      assertFalse("range=" + rangeSpec + " value=" + value, rangeExcl.isValueOK(value));
+      assertFalse("range=" + rangeSpec + " value=" + value, rangeExcl.isInRange(value));
     } else {
-      assertTrue("range=" + rangeSpec + " value=" + value, rangeExcl.isValueOK(value));
+      assertTrue("range=" + rangeSpec + " value=" + value, rangeExcl.isInRange(value));
     }
   }
 }

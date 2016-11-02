@@ -2,14 +2,14 @@ package com.adahas.tools.jmxeval.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.text.StrLookup;
+import org.apache.commons.lang3.text.StrSubstitutor;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 
 /**
  * AbstractElement implementation for configuration elements
@@ -17,63 +17,53 @@ import com.adahas.tools.jmxeval.exception.EvalException;
 public class Element {
 
   /**
-   * Reference to the parent element
-   */
-  private final Element parentElement;
-
-  /**
    * References to the child elements
    */
   private final List<Element> childElements = new ArrayList<>();
 
   /**
-   * Pattern to match content within square braces (variable names within strings)
+   * Execution context.
    */
-  private static final String REGEX_INNER_BRACES = "\\$\\{([^\\{\\}]*)\\}";
+  protected final Context context;
 
   /**
-   * Pattern to match REGEX_INNER_BRACES
+   * String substituter.
    */
-  private static final Pattern PATTERN_INNER_BRACES = Pattern.compile(REGEX_INNER_BRACES);
+  private final StrSubstitutor substitutor;
 
   /**
-   * Constructs the element
+   * Construct with the execution context.
    *
-   * @param parentElement Parent element
+   * @param context Execution context
    */
-  protected Element(final Element parentElement) {
-    this.parentElement = parentElement;
+  protected Element(final Context context) {
+    this.context = context;
+
+    // Initialise string substituter for token replacement in variables
+    this.substitutor = new StrSubstitutor(new StrLookup<String>() {
+      @Override
+      public String lookup(final String key) {
+        final Object value = context.getVar(key);
+        if (value == null) {
+          return null;
+        } else {
+          return String.valueOf(value);
+        }
+      }
+    });
+    this.substitutor.setEnableSubstitutionInVariables(true);
   }
 
   /**
    * Process method to be overridden to implement different behaviour,
    * and defaults to executing child element process() methods
    *
-   * @param context Execution context
-   * @throws EvalException When processing fails
+   * @throws JMXEvalException When processing fails
    */
-  public void process(final Context context) throws EvalException {
+  public void process() throws JMXEvalException {
     for (Element element : childElements) {
-      element.process(context);
+      element.process();
     }
-  }
-
-  /**
-   * Get the parent element
-   *
-   * @return the parentElement
-   */
-  protected Element getParentElement() {
-    return parentElement;
-  }
-
-  /**
-   * Get the child elements
-   *
-   * @return the childElements
-   */
-  protected List<Element> getChildElements() {
-    return childElements;
   }
 
   /**
@@ -86,87 +76,144 @@ public class Element {
   }
 
   /**
-   * Replaces variable names mentioned within square brackets within a string with
-   * their actual values using the the global variables set
+   * Create a Field.
    *
-   * @param context Parsing context
-   * @param source String to check for variable names
-   * @return String with variable names replaced with values
-   * @throws EvalException When the mentioned variable is not defined
-   */
-  protected String replaceWithVars(final Context context, final String source) throws EvalException {
-    final Matcher matcher = PATTERN_INNER_BRACES.matcher(source);
-
-    final StringBuffer buffer = new StringBuffer();
-    while (matcher.find()) {
-      final Object result = context.getVar(matcher.group(1));
-      matcher.appendReplacement(buffer, String.valueOf(result));
-    }
-    matcher.appendTail(buffer);
-
-    return buffer.toString();
-  }
-
-  /**
-   * Replaces variable names mentioned within square brackets within a string with
-   * their actual values using the the global variables set
-   *
-   * @param source String to check for variable names
-   * @return String with variable names replaced with values
-   * @throws EvalException When the mentioned variable is not defined
-   */
-  protected String replaceWithVars(final String source) {
-    final Matcher matcher = PATTERN_INNER_BRACES.matcher(source);
-
-    final StringBuffer buffer = new StringBuffer();
-    while (matcher.find()) {
-      final String varName = matcher.group(1);
-      final Object result = System.getProperty(varName);
-      if (result != null) {
-        matcher.appendReplacement(buffer, String.valueOf(result));
-      }
-    }
-    matcher.appendTail(buffer);
-
-    return buffer.toString();
-  }
-
-  /**
-   * Get an attribute value from a node
-   *
-   * @param node Node to fetch the attribute value from
-   * @param attribute Attribute name
+   * @param node Node to lookup the attribute on
+   * @param attribute Attribute to look up
    * @param defaultValue Default value
-   * @return Attribute value
+   * @return the {@link Field} to get the node attribute
    */
-  protected String getNodeAttribute(final Node node, final String attribute, final String defaultValue) {
-    final NamedNodeMap serverNodeAttributes = node.getAttributes();
-    final Node attributeNode = serverNodeAttributes.getNamedItem(attribute);
-
-    String returnValue;
-
-    if (attributeNode == null) {
-      returnValue = defaultValue;
-    } else {
-      returnValue = attributeNode.getNodeValue();
-    }
-
-    // Replace any variables set via system properties
-    if (returnValue != null) {
-      returnValue = replaceWithVars(returnValue);
-    }
-
-    return returnValue;
+  public Field getNodeAttr(final Node node, final String attribute, final Field defaultValue) {
+    return new NodeField(node, attribute, defaultValue);
   }
 
   /**
-   * Get an attribute value from a node
+   * Create a Field.
    *
-   * @param node Node to fetch the attribute value from
-   * @param attribute Attribute name
-   * @return Attribute value
+   * @param node Node to lookup the attribute on
+   * @param attribute Attribute to look up
+   * @param defaultValue Default value
+   * @return the {@link Field} to get the node attribute
    */
-  protected String getNodeAttribute(final Node node, final String attribute) {
-    return getNodeAttribute(node, attribute, null);
+  public Field getNodeAttr(final Node node, final String attribute, final String defaultValue) {
+    return new NodeField(node, attribute, new Literal(defaultValue));
+  }
+
+  /**
+   * Create a Field.
+   *
+   * @param node Node to lookup the attribute on
+   * @param attribute Attribute to look up
+   * @param defaultValue Default value
+   * @return the {@link Field} to get the node attribute
+   */
+  public Field getNodeAttr(final Node node, final String attribute) {
+    return new NodeField(node, attribute, literal(null));
+  }
+
+  /**
+   * Create a Literal.
+   *
+   * @param value Literal value
+   * @return the {@link Literal} to get the value
+   */
+  public static Literal literal(final String value) {
+    return new Literal(value);
+  }
+
+  /**
+   * Create a Literal.
+   *
+   * @param value Literal value
+   * @return the {@link Literal} to get the value
+   */
+  public static Literal literalNull() {
+    return new Literal(null);
+  }
+
+
+  /**
+   * Value provider interface for {@link Field}.
+   */
+  public abstract static class Field {
+
+    /**
+     * Get the field value.
+     */
+    public abstract String get();
+
+    /**
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+      return String.valueOf(get());
+    }
+  }
+
+  /**
+   * Field of element where the value is calculated lazily.
+   */
+  public class NodeField extends Field {
+
+    private final Node node;
+    private final String attribute;
+    private final Field defaultValue;
+
+    private NodeField(final Node node, final String attribute, final Field defaultValue) {
+      super();
+      this.node = node;
+      this.attribute = attribute;
+      this.defaultValue = defaultValue;
+    }
+
+    /**
+     * @see com.adahas.tools.jmxeval.model.Element.FieldValueProvider#get()
+     */
+    @Override
+    public String get() {
+      final NamedNodeMap nodeAttributes = node.getAttributes();
+      final Node attributeNode = nodeAttributes.getNamedItem(attribute);
+
+      String attributeValue = null;
+
+      // Get the value of the attribute
+      if (attributeNode != null) {
+        attributeValue = attributeNode.getNodeValue();
+      }
+
+      // If the value is null, set the default
+      if (attributeValue == null) {
+        attributeValue = defaultValue.get();
+      }
+
+      // Replace any variables
+      if (attributeValue != null) {
+        attributeValue = substitutor.replace(attributeValue);
+      }
+
+      return attributeValue;
+    }
+  }
+
+  /**
+   * Literal value field.
+   */
+  public static class Literal extends Field {
+
+    private final String value;
+
+    private Literal(final String value) {
+      super();
+      this.value = value;
+    }
+
+    /**
+     * @see com.adahas.tools.jmxeval.model.Element.Field#get()
+     */
+    @Override
+    public String get() {
+      return value;
+    }
   }
 }

@@ -5,6 +5,8 @@ import java.math.RoundingMode;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
+
 /**
  * Evaluates a complex mathematical expression. Supported operations are addition, subtraction,
  * division and multiplication. To enforce precedence of evaluation braces could be used, and
@@ -22,7 +24,7 @@ public class ExprEval {
   /**
    * Regular expression to match invalid characters in an expression
    */
-  protected static final String REGEX_INVALID_CHAR = "[^\\+\\-\\*\\/.0-9]{1}";
+  protected static final String REGEX_INVALID_CHAR = "[^\\+\\-\\*\\/\\.0-9\\%]{1}";
 
   /**
    * Regular expression to match a numeric value
@@ -45,26 +47,6 @@ public class ExprEval {
   protected static final String REGEX_INNER_BRACES = "\\([^()]*\\)";
 
   /**
-   * Regular expression to match multiply operator
-   */
-  protected static final String REGEX_OP_MULTIPLY = "\\*";
-
-  /**
-   * Regular expression to match division operator
-   */
-  protected static final String REGEX_OP_DIVIDE = "\\/";
-
-  /**
-   * Regular expression to match addition operator
-   */
-  protected static final String REGEX_OP_ADD = "\\+";
-
-  /**
-   * Regular expression to match subtract operator
-   */
-  protected static final String REGEX_OP_SUBTRACT = "\\-";
-
-  /**
    * Open brace character
    */
   protected static final String BRACE_OPEN = "(";
@@ -78,10 +60,21 @@ public class ExprEval {
    * Supported operations defined in order of precedence to process
    */
   enum Operation {
-    DIVIDE,
-    MULTIPLY,
-    ADD,
-    SUBSTRACT
+    DIVIDE("\\/"),
+    MULTIPLY("\\*"),
+    ADD("\\+"),
+    SUBSTRACT("\\-"),
+    REMAINDER("%");
+
+    private String regEx;
+
+    private Operation(final String regEx) {
+      this.regEx = regEx;
+    }
+
+    public String getRegEx() {
+      return regEx;
+    }
   }
 
   /**
@@ -109,22 +102,15 @@ public class ExprEval {
    * @param expression Mathematical expression
    * @return Result value
    */
-  public Object evaluate() {
+  public Object evaluate() throws JMXEvalException {
     final String resultString = processComplexExpr(initialExpression);
 
     // set the final scale as requested
-    BigDecimal result = new BigDecimal(resultString);
-    result = result.setScale(scale, RoundingMode.HALF_EVEN);
-
-    Object returnValue;
-
-    if (scale == 0) {
-      returnValue = result.longValue();
-    } else {
-      returnValue = result.doubleValue();
+    try {
+      return new BigDecimal(resultString).setScale(scale, RoundingMode.HALF_EVEN);
+    } catch (NumberFormatException e) {
+      throw new JMXEvalException("Result [" + resultString + "] of the expression [" + initialExpression + "] cannot be converted to number", e);
     }
-
-    return returnValue;
   }
 
   /**
@@ -133,7 +119,7 @@ public class ExprEval {
    * E.g.
    * 9 + (3 + (5 + 4)) + (2 + 3) will evaluate to 26
    */
-  protected String processComplexExpr(final String expression) {
+  protected String processComplexExpr(final String expression) throws JMXEvalException {
     String currentExpr;
     String processedExpr = expression;
 
@@ -155,12 +141,11 @@ public class ExprEval {
    * E.g.
    * 9 + (3 + (5 + 4)) + (2 + 3) will evaluate to 9 + (3 + 9) + 5
    */
-  protected String processComplexExprPart(final String expression) {
-
+  protected String processComplexExprPart(final String expression) throws JMXEvalException {
     final Pattern pattern = Pattern.compile(REGEX_INNER_BRACES);
     final Matcher matcher = pattern.matcher(expression);
 
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer(); // NOSONAR Pattern class doesn't work with StringBuilder
     while (matcher.find()) {
       final String result = processSimpleExpr(matcher.group());
       matcher.appendReplacement(buffer, result);
@@ -177,7 +162,7 @@ public class ExprEval {
    * 4 + 9 will evaluate to 13
    * 5 + 3 * 2 will evaluate to 11 (as multiplication takes precedence over addition)
    */
-  protected String processSimpleExpr(final String expression) {
+  protected String processSimpleExpr(final String expression) throws JMXEvalException {
 
     validateSimpleExpr(expression);
 
@@ -205,48 +190,19 @@ public class ExprEval {
    * 3 % 3 will evaluate as invalid syntax
    * 3& 3 will evaluate as invalid syntax
    */
-  protected void validateSimpleExpr(final String expression) {
+  protected void validateSimpleExpr(final String expression) throws JMXEvalException {
     final Pattern pattern1 = Pattern.compile(REGEX_NUMERIC_VALUE + REGEX_WHITE_SPACE_MNDTRY + REGEX_NUMERIC_VALUE);
     final Matcher matcher1 = pattern1.matcher(expression);
 
     if (matcher1.find()) {
-      throw new IllegalArgumentException("Invalid expression: [" + expression +
-          "] matched invalid block [" + matcher1.group() + "]");
+      throw new JMXEvalException("Block [" + matcher1.group() + "] in expression [" + expression + "] invalid");
     }
 
-    final Pattern pattern2 = Pattern.compile(REGEX_NUMERIC_VALUE + REGEX_WHITE_SPACE_OPTNL + REGEX_INVALID_CHAR +
-        REGEX_WHITE_SPACE_OPTNL + REGEX_NUMERIC_VALUE);
+    final Pattern pattern2 = Pattern.compile(REGEX_NUMERIC_VALUE + REGEX_WHITE_SPACE_OPTNL + REGEX_INVALID_CHAR + REGEX_WHITE_SPACE_OPTNL + REGEX_NUMERIC_VALUE);
     final Matcher matcher2 = pattern2.matcher(expression);
     if (matcher2.find()) {
-      throw new IllegalArgumentException("Invalid expression: [" + expression +
-          "] matched invalid block [" + matcher2.group() + "]");
+      throw new JMXEvalException("Block [" + matcher2.group() + "] in expression [" + expression + "] invalid");
     }
-  }
-
-  /**
-   * Get regular expression for the given operation
-   */
-  protected String getRegExForOperation(final Operation operation) {
-    String opRegEx;
-
-    switch (operation) {
-      case ADD:
-        opRegEx = REGEX_OP_ADD;
-        break;
-      case SUBSTRACT:
-        opRegEx = REGEX_OP_SUBTRACT;
-        break;
-      case MULTIPLY:
-        opRegEx = REGEX_OP_MULTIPLY;
-        break;
-      case DIVIDE:
-        opRegEx = REGEX_OP_DIVIDE;
-        break;
-      default:
-        throw new IllegalArgumentException("Unsupported operation: " + operation);
-    }
-
-    return opRegEx;
   }
 
   /**
@@ -257,12 +213,10 @@ public class ExprEval {
    * 3 + 5 * 6 / 3 will evaluate to 3 + 30 / 3
    */
   protected String attemptOperation(final String expression, final Operation operation) {
-    final String opRegEx = getRegExForOperation(operation);
-
     final Pattern pattern = Pattern.compile(REGEX_NUMERIC_VALUE + REGEX_WHITE_SPACE_OPTNL +
-        opRegEx + REGEX_WHITE_SPACE_OPTNL + REGEX_NUMERIC_VALUE);
+        operation.getRegEx() + REGEX_WHITE_SPACE_OPTNL + REGEX_NUMERIC_VALUE);
 
-    final StringBuffer buffer = new StringBuffer();
+    final StringBuffer buffer = new StringBuffer(); // NOSONAR Pattern class doesn't work with StringBuilder
 
     final Matcher matcher = pattern.matcher(expression);
     if (matcher.find()) {
@@ -283,6 +237,9 @@ public class ExprEval {
         case DIVIDE:
           // use a scale of n + 4, where n is the scale requested for the result
           result = operand1.divide(operand2, scale + 4, RoundingMode.HALF_EVEN);
+          break;
+        case REMAINDER:
+          result = operand1.remainder(operand2);
           break;
         default:
           throw new IllegalArgumentException("Unsupported operation: " + operation);

@@ -5,15 +5,14 @@ import java.util.Arrays;
 
 import javax.management.JMException;
 import javax.management.ObjectName;
-import javax.management.openmbean.CompositeDataSupport;
+import javax.management.openmbean.CompositeData;
 
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.model.PerfDataSupport;
-import com.adahas.tools.jmxeval.response.Status;
 
 /**
  * Element to configure JMX calls
@@ -23,77 +22,72 @@ public class Query extends Element implements PerfDataSupport {
   /**
    * Variable name
    */
-  private final String var;
+  private final Field var;
 
   /**
    * MBean object name
    */
-  private final String objectName;
+  private final Field objectName;
 
   /**
    * MBean attribute
    */
-  private final String attribute;
+  private final Field attribute;
 
   /**
    * Composite MBean attribute name (optional)
    */
-  private final String compositeAttribute;
+  private final Field compositeAttribute;
 
   /**
    * Constructs the element
    *
+   * @param context Execution context
    * @param node XML node
-   * @param parentElement Parent element
    */
-  public Query(final Node node, final Element parentElement) {
-    super(parentElement);
+  public Query(final Context context, final Node node) {
+    super(context);
 
-    this.var = getNodeAttribute(node, "var");
-    this.objectName = getNodeAttribute(node, "objectName");
-    this.attribute = getNodeAttribute(node, "attribute");
-    this.compositeAttribute = getNodeAttribute(node, "compositeAttribute");
+    this.var = getNodeAttr(node, "var");
+    this.objectName = getNodeAttr(node, "objectName");
+    this.attribute = getNodeAttr(node, "attribute");
+    this.compositeAttribute = getNodeAttr(node, "compositeAttribute");
   }
 
   /**
-   * @see Element#process(Context)
+   * @see Element#process()
    */
   @Override
-  public void process(final Context context) throws EvalException {
+  public void process() throws JMXEvalException {
     try {
       if (context.getConnection() == null) {
-        throw new EvalException(Status.UNKNOWN, "Can not connect to server");
+        throw new JMXEvalException("Could not connect to server");
       }
 
-      final ObjectName mbeanName = new ObjectName(objectName);
+      final ObjectName mbeanName = new ObjectName(objectName.get());
       Object attributeValue;
 
       // retrieve attribute value
-      if (compositeAttribute == null) {
-        final Object attributeVal = context.getConnection().getAttribute(mbeanName, attribute);
+      if (compositeAttribute.get() == null) {
+        final Object attributeVal = context.getConnection().getAttribute(mbeanName, attribute.get());
         if (attributeVal instanceof String[]) {
           attributeValue = Arrays.asList((String[]) attributeVal);
         } else {
           attributeValue = attributeVal;
         }
       } else {
-        final CompositeDataSupport compositeAttributeValue =
-            (CompositeDataSupport) context.getConnection().getAttribute(mbeanName, compositeAttribute);
-        attributeValue = compositeAttributeValue.get(attribute);
+        final CompositeData compositeData = (CompositeData) context.getConnection().getAttribute(mbeanName, compositeAttribute.get());
+        attributeValue = compositeData.get(attribute.get());
       }
 
       // set query result as variable
-      context.setVar(var, attributeValue);
+      context.setVar(var.get(), attributeValue);
 
       // process child elements
-      super.process(context);
+      super.process();
 
-    } catch (IOException e) {
-      throw new EvalException(Status.UNKNOWN, "Reading attribute failed [" + attribute + "] from object [" +
-          objectName + "]" + (compositeAttribute == null ? "" : " composite result [" + compositeAttribute + "]"), e);
-    } catch (JMException e) {
-      throw new EvalException(Status.UNKNOWN, "Can not read attribute [" + attribute + "] from object [" +
-          objectName + "]" + (compositeAttribute == null ? "" : " composite result [" + compositeAttribute + "]"), e);
+    } catch (IOException | JMException e) {
+      throw new JMXEvalException("Failed to get [" + attribute + "] from [" + objectName + "]" + (compositeAttribute.get() == null ? "" : " in [" + compositeAttribute + "]"), e);
     }
   }
 
@@ -101,7 +95,7 @@ public class Query extends Element implements PerfDataSupport {
    * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getVar()
    */
   @Override
-  public String getVar() {
+  public Field getVar() {
     return var;
   }
 
@@ -109,15 +103,15 @@ public class Query extends Element implements PerfDataSupport {
    * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getCritical()
    */
   @Override
-  public String getCritical() {
-    return null;
+  public Field getCritical() {
+    return literalNull();
   }
 
   /**
    * @see com.adahas.tools.jmxeval.model.PerfDataSupport#getWarning()
    */
   @Override
-  public String getWarning() {
-    return null;
+  public Field getWarning() {
+    return literalNull();
   }
 }

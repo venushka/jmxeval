@@ -4,25 +4,25 @@ package com.adahas.tools.jmxeval.response;
  * Result of a single eval check
  */
 public class EvalResult {
-  
+
   /**
    * Name of the eval
    */
-  private final transient String name;
-  
+  private final String name;
+
   /**
    * Eval status
    */
-  private final transient Status status;
-  
+  private final Status status;
+
   /**
    * Eval result message
    */
-  private final transient String message;
+  private final String message;
 
   /**
    * Constructs an eval result
-   * 
+   *
    * @param name Name of the eval
    * @param status Eval status
    * @param message Eval result message
@@ -30,12 +30,17 @@ public class EvalResult {
   public EvalResult(final String name, final Status status, final String message) {
     this.name = name;
     this.status = status;
-    this.message = message;
+
+    if (message == null) {
+      this.message = null;
+    } else {
+      this.message = message.replaceAll("[\\n\\r\\t]+", " ").replaceAll("[\\s]{2,}", " ").trim();
+    }
   }
 
   /**
    * Get the name of the eval
-   * 
+   *
    * @return the name
    */
   public String getName() {
@@ -44,7 +49,7 @@ public class EvalResult {
 
   /**
    * Get the status of the eval
-   * 
+   *
    * @return the status
    */
   public Status getStatus() {
@@ -53,13 +58,13 @@ public class EvalResult {
 
   /**
    * Get the result message of the eval
-   * 
+   *
    * @return the message
    */
   public String getMessage() {
     return message;
   }
-  
+
   /**
    * Convert the result to its string representation
    */

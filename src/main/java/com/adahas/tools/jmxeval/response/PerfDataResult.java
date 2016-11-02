@@ -76,13 +76,13 @@ public class PerfDataResult {
       builder.append("'");
     }
 
-    builder.append("=");
+    builder.append('=');
     final String strValue = String.valueOf(value);
 
     if ("true".equalsIgnoreCase(strValue)) {
-      builder.append("1");
+      builder.append('1');
     } else if ("false".equalsIgnoreCase(strValue)) {
-      builder.append("0");
+      builder.append('0');
     } else {
       builder.append(strValue);
     }
@@ -96,12 +96,12 @@ public class PerfDataResult {
     };
 
     final StringBuilder suffixData = new StringBuilder();
-    for (String suffix : suffixes) {
+    for (final String suffix : suffixes) {
       if (suffix != null || suffixData.length() > 0) {
         if (suffix != null) {
           suffixData.insert(0, suffix);
         }
-        suffixData.insert(0, ";");
+        suffixData.insert(0, ';');
       }
     }
     builder.append(suffixData);

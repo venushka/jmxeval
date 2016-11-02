@@ -17,9 +17,12 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <!-- version information for used dependencies -->
-    <dep.args4j.version>2.0.29</dep.args4j.version>
-    <dep.mockito.version>1.10.17</dep.mockito.version>
+    <dep.args4j.version>2.33</dep.args4j.version>
+    <dep.mockito.version>2.2.9</dep.mockito.version>
+    <dep.hamcrest.version>2.0.0.0</dep.hamcrest.version>
     <dep.junit.version>4.11</dep.junit.version>
+    <dep.commonslang.version>3.5</dep.commonslang.version>
+    <dep.commonsio.version>2.5</dep.commonsio.version>
 
     <!-- versions of used plugins -->
     <plugin.asciidoctor.version>1.5.0</plugin.asciidoctor.version>
@@ -111,8 +114,14 @@
   <dependencies>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
+      <artifactId>mockito-core</artifactId>
       <version>${dep.mockito.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.hamcrest</groupId>
+      <artifactId>java-hamcrest</artifactId>
+      <version>${dep.hamcrest.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -125,7 +134,16 @@
       <groupId>args4j</groupId>
       <artifactId>args4j</artifactId>
       <version>${dep.args4j.version}</version>
-      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>${dep.commonslang.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>${dep.commonsio.version}</version>
     </dependency>
   </dependencies>
 

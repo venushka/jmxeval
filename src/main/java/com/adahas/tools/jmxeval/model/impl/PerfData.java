@@ -3,7 +3,7 @@ package com.adahas.tools.jmxeval.model.impl;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
-import com.adahas.tools.jmxeval.exception.EvalException;
+import com.adahas.tools.jmxeval.exception.JMXEvalException;
 import com.adahas.tools.jmxeval.model.Element;
 import com.adahas.tools.jmxeval.model.PerfDataSupport;
 import com.adahas.tools.jmxeval.response.PerfDataResult;
@@ -16,70 +16,69 @@ public class PerfData extends Element {
   /**
    * Data label
    */
-  private final String label;
-  
+  private final Field label;
+
   /**
    * Variable to refer
    */
-  private final String var;
-  
+  private final Field var;
+
   /**
    * Critical value/level
    */
-  private final String critical;
-  
+  private final Field critical;
+
   /**
    * Warning value/level
    */
-  private final String warning;
-  
+  private final Field warning;
+
   /**
    * Minimum value
    */
-  private final String min;
-  
+  private final Field min;
+
   /**
    * Maximum value
    */
-  private final String max;
-  
+  private final Field max;
+
   /**
    * Unit of measurement
    */
-  private final String unit;
-  
+  private final Field unit;
+
   /**
    * Constructs the element
-   * 
+   *
    * @param node XML node
    * @param parentElement Parent element
    */
-  public PerfData(final Node node, final Element parentElement) {
-    super(parentElement);
-    
+  public PerfData(final Context context, final Node node, final Element parentElement) {
+    super(context);
+
     final PerfDataSupport parent = (PerfDataSupport) parentElement;
-    
-    this.label = getNodeAttribute(node, "label", parent.getVar());
+
+    this.label = getNodeAttr(node, "label", parent.getVar());
     this.var = parent.getVar();
-    this.critical = getNodeAttribute(node, "critical", parent.getCritical());
-    this.warning = getNodeAttribute(node, "warning", parent.getWarning());
-    this.min = getNodeAttribute(node, "min");
-    this.max = getNodeAttribute(node, "max");
-    this.unit = getNodeAttribute(node, "unit");
+    this.critical = getNodeAttr(node, "critical", parent.getCritical());
+    this.warning = getNodeAttr(node, "warning", parent.getWarning());
+    this.min = getNodeAttr(node, "min");
+    this.max = getNodeAttr(node, "max");
+    this.unit = getNodeAttr(node, "unit");
   }
-  
+
   /**
-   * @see Element#process(Context)
+   * @see Element#process()
    */
   @Override
-  public void process(final Context context) throws EvalException {
-    final Object value = context.getVar(var);
-    
+  public void process() throws JMXEvalException {
+    final Object value = context.getVar(var.get());
+
     // set performance data
-    context.getResponse().addPerfData(new PerfDataResult(
-        label, value, unit, warning, critical, min, max));
-    
+    context.getResponse().addPerfData(new PerfDataResult(label.get(), value, unit.get(), warning.get(), critical.get(), min.get(), max.get()));
+
     // process child elements
-    super.process(context);
+    super.process();
   }
 }

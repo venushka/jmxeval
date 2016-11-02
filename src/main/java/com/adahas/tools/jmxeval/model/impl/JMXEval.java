@@ -1,7 +1,6 @@
 package com.adahas.tools.jmxeval.model.impl;
 
-import org.w3c.dom.Node;
-
+import com.adahas.tools.jmxeval.Context;
 import com.adahas.tools.jmxeval.model.Element;
 
 /**
@@ -10,12 +9,11 @@ import com.adahas.tools.jmxeval.model.Element;
 public class JMXEval extends Element {
 
   /**
-   * Constructs the element
+   * Create instance.
    *
-   * @param node XML node
-   * @param parentElement Parent element
+   * @param context Execution context
    */
-  public JMXEval(@SuppressWarnings("unused") final Node node, final Element parentElement) {
-    super(parentElement);
+  public JMXEval(final Context context) {
+    super(context);
   }
 }
