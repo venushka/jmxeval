@@ -106,7 +106,7 @@ public class AppTest {
     doThrow(new JMXEvalException("Something went wrong")).when(jmxEval).process();
 
     // when
-    final int returnValue = app.execute(new String[] { "testfile.xml", "--verbose" }, outputWriter, errorWriter);
+    final int returnValue = app.execute(new String[] { "testfile.xml" }, outputWriter, errorWriter);
 
     // then
     verify(elementBuilder).build(contextCaptor.capture());
