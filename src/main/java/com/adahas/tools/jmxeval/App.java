@@ -97,7 +97,7 @@ public class App {
    *
    * @param logLevel Log levele
    */
-  public void setLogLevel(final Level logLevel) {
+  private void setLogLevel(final Level logLevel) {
     final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
     final LoggerConfig loggerConfig = ctx.getConfiguration().getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
     loggerConfig.setLevel(logLevel);

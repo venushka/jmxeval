@@ -13,6 +13,11 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import java.io.PrintStream;
 import java.util.List;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -41,6 +46,15 @@ public class AppTest {
   @Captor private ArgumentCaptor<Context> contextCaptor;
   @Captor private ArgumentCaptor<String> outputCaptor;
   @Captor private ArgumentCaptor<String> errorCaptor;
+
+  @After
+  public void tearDown() {
+    // Switch off logging if any of the tests enabled verbose logging
+    final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    final LoggerConfig loggerConfig = ctx.getConfiguration().getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+    loggerConfig.setLevel(Level.OFF);
+    ctx.updateLoggers();
+  }
 
   /**
    * Test successful execution.
