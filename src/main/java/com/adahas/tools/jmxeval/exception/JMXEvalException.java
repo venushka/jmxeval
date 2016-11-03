@@ -1,5 +1,10 @@
 package com.adahas.tools.jmxeval.exception;
 
+/**
+ * Thrown when an expected exception occurs.
+ *
+ * @author Copyright (c) CHP Consulting Ltd. 2016
+ */
 public class JMXEvalException extends Exception {
 
   /**

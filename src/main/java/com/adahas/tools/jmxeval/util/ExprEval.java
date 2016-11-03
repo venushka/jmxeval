@@ -72,6 +72,11 @@ public class ExprEval {
       this.regEx = regEx;
     }
 
+    /**
+     * Get regular expression that matches the operation symbol.
+     *
+     * @return regex pattern
+     */
     public String getRegEx() {
       return regEx;
     }
