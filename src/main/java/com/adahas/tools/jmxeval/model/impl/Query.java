@@ -7,6 +7,7 @@ import javax.management.JMException;
 import javax.management.ObjectName;
 import javax.management.openmbean.CompositeData;
 
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
@@ -68,7 +69,7 @@ public class Query extends Element implements PerfDataSupport {
       Object attributeValue;
 
       // retrieve attribute value
-      if (compositeAttribute.get() == null) {
+      if (StringUtils.isBlank(compositeAttribute.get())) {
         final Object attributeVal = context.getConnection().getAttribute(mbeanName, attribute.get());
         if (attributeVal instanceof String[]) {
           attributeValue = Arrays.asList((String[]) attributeVal);

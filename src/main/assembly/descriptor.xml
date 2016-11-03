@@ -4,11 +4,12 @@
   xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.0 http://maven.apache.org/xsd/assembly-1.1.0.xsd">
   
   <!-- Distribution -->
-  <id>dist</id>
+  <id>bin</id>
   
   <!-- Distribution formats -->
   <formats>
-	  <format>zip</format>
+    <format>zip</format>
+    <format>tar.gz</format>
   </formats>
   
   <!-- Included content -->
@@ -19,23 +20,25 @@
       <includes>
         <include>*.jar</include>
       </includes>
-      <outputDirectory>/</outputDirectory>
+      <outputDirectory>/jmxeval/lib</outputDirectory>
     </fileSet>
-    <!-- Include the Dependency Jars -->
-    <fileSet>
-      <directory>${project.build.directory}/lib</directory>
-      <includes>
-        <include>*.jar</include>
-      </includes>
-      <outputDirectory>/lib</outputDirectory>
-    </fileSet>
-    <!-- Include all scripts -->
+    <!-- Include scripts -->
     <fileSet>
       <directory>${basedir}/src/main/script</directory>
       <includes>
-        <include>*</include>
+        <include>check_jmxeval</include>
       </includes>
       <outputDirectory>/</outputDirectory>
+      <fileMode>0755</fileMode>
+      <lineEnding>unix</lineEnding>
+    </fileSet>
+    <fileSet>
+      <directory>${basedir}/src/main/script</directory>
+      <includes>
+        <include>check_jmxeval.bat</include>
+      </includes>
+      <outputDirectory>/</outputDirectory>
+      <lineEnding>dos</lineEnding>
     </fileSet>
     <!-- Include documents -->
     <fileSet>
@@ -47,7 +50,7 @@
   </fileSets>
   <dependencySets>
     <dependencySet>
-      <outputDirectory>lib</outputDirectory>
+      <outputDirectory>/jmxeval/lib</outputDirectory>
       <useProjectArtifact>false</useProjectArtifact>
       <scope>runtime</scope>
     </dependencySet>

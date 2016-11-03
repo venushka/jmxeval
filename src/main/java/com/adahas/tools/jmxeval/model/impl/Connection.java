@@ -12,6 +12,7 @@ import javax.management.remote.JMXServiceURL;
 import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
@@ -72,7 +73,7 @@ public class Connection extends Element {
       final JMXServiceURL jmxServiceURL = new JMXServiceURL(url.get());
       final Map<String, Object> jmxEnv = new HashMap<>();
 
-      if (username.get() != null) {
+      if (!StringUtils.isBlank(username.get())) {
         jmxEnv.put(JMXConnector.CREDENTIALS, new String[] { username.get(), password.get() });
       }
 

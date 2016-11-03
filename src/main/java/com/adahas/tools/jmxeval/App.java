@@ -1,7 +1,10 @@
 package com.adahas.tools.jmxeval;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.logging.Level;
+import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
 import org.kohsuke.args4j.CmdLineException;
@@ -12,8 +15,6 @@ import com.adahas.tools.jmxeval.model.ElementBuilder;
 import com.adahas.tools.jmxeval.model.impl.JMXEval;
 import com.adahas.tools.jmxeval.response.PerfDataResult;
 import com.adahas.tools.jmxeval.response.Status;
-import com.adahas.tools.jmxeval.util.LogUtil;
-import com.adahas.tools.jmxeval.util.LogUtil.Mode;
 
 /**
  * Main application class that reads the jmxeval configuration file and process it to
@@ -36,8 +37,8 @@ public class App {
    * @throws CmdLineException with bad command line options
    */
   protected int execute(final String[] args, final PrintStream outputWriter, final PrintStream errorWriter) {
-    // set logging mode to NONE to ensure nothing is logged to console unless --verbose option is set
-    LogUtil.setLogMode(Mode.NONE);
+    // set logging level to OFF to ensure nothing is logged to console unless --verbose option is set
+    setLogConfigururation("/logging.properties");
 
     final Context context = new Context();
     final CmdLineParser parser = new CmdLineParser(context);
@@ -48,7 +49,7 @@ public class App {
 
       // enable verbose logging if --verbose option is set
       if (context.isVerbose()) {
-        LogUtil.setLogMode(Mode.VERBOSE);
+        setLogConfigururation("/logging-verbose.properties");
       }
 
       // capture start time
@@ -92,6 +93,19 @@ public class App {
   }
 
   /**
+   * Set the logging mode.
+   *
+   * @param mode Mode to set
+   */
+  public void setLogConfigururation(final String configuration) {
+    try (final InputStream configStream = App.class.getResourceAsStream(configuration)) {
+      LogManager.getLogManager().readConfiguration(configStream);
+    } catch (IOException e) {
+      log.log(Level.WARNING, "Could not load log configuration", e);
+    }
+  }
+
+  /**
    * Main.
    *
    * @param args Argument list, when empty, syntax will be displayed
@@ -99,7 +113,6 @@ public class App {
   public static void main(final String...args)  {
     System.exit(new App().execute(args, System.out, System.err)); // NOSONAR - As this is a console application, System.out/err must be used.
   }
-
 
   /**
    * Get an {@link ElementBuilder} instance. Using a getter method to allow testing, due to lack of a DI framework.

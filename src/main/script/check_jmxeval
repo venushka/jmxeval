@@ -9,8 +9,7 @@
 #
 # JAVA_HOME=/path/to/jdk-1.7.0
 #
-# Executes JMXEval
+# Execute JMXEval
 #
 BASE_DIR=`dirname $0`
-LIB_DIR="$BASE_DIR/lib"
-$JAVA_HOME/bin/java -classpath "$BASE_DIR/jmxeval-1.2.6.jar:$LIB_DIR/args4j-2.0.16.jar" com.adahas.tools.jmxeval.App $@
+$JAVA_HOME/bin/java -classpath "$BASE_DIR/jmxeval/lib/*.jar" com.adahas.tools.jmxeval.App $@
