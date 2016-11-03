@@ -2,10 +2,10 @@ package com.adahas.tools.jmxeval.model.impl;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
@@ -19,7 +19,7 @@ import com.adahas.tools.jmxeval.response.Status;
  */
 public class Eval extends Element {
 
-  private static final Logger log = Logger.getLogger(Eval.class.getName());
+  private static final Logger log = LogManager.getLogger(Eval.class);
 
   /**
    * Name of the eval
@@ -76,7 +76,7 @@ public class Eval extends Element {
       }
 
     } catch (JMXEvalException | RuntimeException | UnknownHostException e) {
-      log.log(Level.SEVERE, e.getMessage(), e);
+      log.error("Error while evaluating check", e);
 
       // add the evaluation failure to the response
       context.getResponse().addEvalResult(new EvalResult(name.get(), Status.UNKNOWN, e.getMessage() + " [" + e.getClass().getName() + "]"));

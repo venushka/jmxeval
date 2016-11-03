@@ -48,7 +48,7 @@ public class Expr extends Element implements PerfDataSupport {
   @Override
   public void process() throws JMXEvalException {
     final ExprEval exprEval = new ExprEval(expression.get());
-    if (scale != null) {
+    if (scale.get() != null) {
       exprEval.setScale(Integer.parseInt(scale.get()));
     }
     final Object result = exprEval.evaluate();

@@ -15,10 +15,10 @@ import com.adahas.tools.jmxeval.exception.JMXEvalException;
  */
 public class NagiosRange {
 
-  private static final Pattern RANGE_PATTERN = Pattern.compile("^(?<inside>@?)(((?<start>[-\\.0-9]+|~|):)|)(?<end>[-\\.0-9]+|~|)");
+  private static final Pattern RANGE_PATTERN = Pattern.compile("^(?<inside>@?)(((?<start>-?[0-9]+\\.?[0-9]*|~|):)|)(?<end>-?[0-9]+\\.?[0-9]*|~|)");
 
-  private double start;
-  private double end;
+  private final double start;
+  private final double end;
   private final boolean inside;
 
   /**
@@ -50,20 +50,12 @@ public class NagiosRange {
     //
     // set the start value.  default is 0.0 and ~ means negative infinity
     //
-    try {
-      start = toValue(startStr, 0.0, Double.NEGATIVE_INFINITY);
-    } catch (NumberFormatException e) {
-      throw new JMXEvalException("Bad start value [" + startStr + "] in range [" + range + "]", e);
-    }
+    start = toValue(startStr, 0.0, Double.NEGATIVE_INFINITY);
 
     //
     // set the end value default is infinity and ~ also means infinity
     //
-    try {
-      end = toValue(endStr, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-    } catch (NumberFormatException e) {
-      throw new JMXEvalException("Bad end value [" + endStr + "] in range: [" + range + "]", e);
-    }
+    end = toValue(endStr, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
 
     //
     // Start MUST NOT be greater than end!

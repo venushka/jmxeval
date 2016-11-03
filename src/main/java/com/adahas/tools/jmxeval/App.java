@@ -1,12 +1,12 @@
 package com.adahas.tools.jmxeval;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 
@@ -23,7 +23,7 @@ import com.adahas.tools.jmxeval.response.Status;
  */
 public class App {
 
-  private static final Logger log = Logger.getLogger(App.class.getName());
+  private static final Logger log = LogManager.getLogger(App.class);
 
   /**
    * Process executor method as the actual process will need to perform
@@ -38,7 +38,7 @@ public class App {
    */
   protected int execute(final String[] args, final PrintStream outputWriter, final PrintStream errorWriter) {
     // set logging level to OFF to ensure nothing is logged to console unless --verbose option is set
-    setLogConfigururation("/logging.properties");
+    setLogLevel(Level.OFF);
 
     final Context context = new Context();
     final CmdLineParser parser = new CmdLineParser(context);
@@ -49,7 +49,7 @@ public class App {
 
       // enable verbose logging if --verbose option is set
       if (context.isVerbose()) {
-        setLogConfigururation("/logging-verbose.properties");
+        setLogLevel(Level.DEBUG);
       }
 
       // capture start time
@@ -73,13 +73,13 @@ public class App {
       return context.getResponse().getStatus().getValue();
 
     } catch (JMXEvalException e) {
-      log.log(Level.SEVERE, "Error while evaluating checks", e);
+      log.error("Error while evaluating checks", e);
 
       // print error
       errorWriter.println("Error: " + e.getMessage() + " (Run with --verbose for option debug information)");
 
     } catch (CmdLineException e) {
-      log.log(Level.SEVERE, "Error parsing command line arguments", e);
+      log.error("Error parsing command line arguments", e);
 
       // print error and usage information
       errorWriter.println("Error: " + e.getMessage());
@@ -93,16 +93,15 @@ public class App {
   }
 
   /**
-   * Set the logging mode.
+   * Change the logging level.
    *
-   * @param mode Mode to set
+   * @param logLevel Log levele
    */
-  public void setLogConfigururation(final String configuration) {
-    try (final InputStream configStream = App.class.getResourceAsStream(configuration)) {
-      LogManager.getLogManager().readConfiguration(configStream);
-    } catch (IOException e) {
-      log.log(Level.WARNING, "Could not load log configuration", e);
-    }
+  public void setLogLevel(final Level logLevel) {
+    final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+    final LoggerConfig loggerConfig = ctx.getConfiguration().getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
+    loggerConfig.setLevel(logLevel);
+    ctx.updateLoggers();
   }
 
   /**

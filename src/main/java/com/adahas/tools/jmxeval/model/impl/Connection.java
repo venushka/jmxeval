@@ -3,8 +3,6 @@ package com.adahas.tools.jmxeval.model.impl;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.management.remote.JMXConnector;
 import javax.management.remote.JMXConnectorFactory;
@@ -13,6 +11,8 @@ import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Node;
 
 import com.adahas.tools.jmxeval.Context;
@@ -26,7 +26,7 @@ import com.adahas.tools.jmxeval.model.ElementBuilder;
  */
 public class Connection extends Element {
 
-  private static final Logger log = Logger.getLogger(Connection.class.getName());
+  private static final Logger log = LogManager.getLogger(Connection.class);
 
   /**
    * Connection URL
@@ -88,7 +88,7 @@ public class Connection extends Element {
       context.setConnection(jmxConnector.getMBeanServerConnection());
 
     } catch (IOException e) {
-      log.log(Level.WARNING, "Exception occured while opening connection", e);
+      log.warn("Exception occured while opening connection", e);
       // do not set the connection if exception occurs, but let the process continue
       // so that the plugin output is consistent, and shows all the eval checks on it
     } finally {
