@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi" ssl="false" username="${username:}" password="${password:}">
+    <eval name="Heap Size">
+      <query var="heapusage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />
+      <check useVar="heapusage" warning="${memoryWarning}" critical="${memoryCritical}" message="Heap size is ${heapusage}">
+        <perf />
+      </check>
+    </eval>
+    <eval name="Threads">
+      <query var="threadCount" objectName="java.lang:type=Threading" attribute="ThreadCount" />
+      <check useVar="threadCount" warning="${threadsWarning}" critical="${threadsCritical}" message="ThreadCount is ${threadCount}">
+        <perf />
+      </check>
+    </eval>
+    <eval name="Java Version">
+      <query var="javaVersion" objectName="java.lang:type=Runtime" attribute="SpecVersion" />
+      <check useVar="javaVersion" mode="regex" critical="^((?!1\.8).)*$" message="Java version is ${javaVersion}" />
+    </eval>
+    <eval name="GC Duration">
+      <query var="gcMillis" objectName="java.lang:type=GarbageCollector,name=PS Scavenge" compositeAttribute="LastGcInfo" attribute="duration" />
+      <expr var="gcSecs" expression="${gcMillis} / 1000" scale="0" />
+      <check useVar="secs" warning="${gcWarning}" critical="${gcCritical}" message="Last GC took ${gcSecs}s">
+        <perf />
+      </check>
+    </eval>
+  </connection>
+</jmxeval:jmxeval>

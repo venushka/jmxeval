@@ -42,10 +42,20 @@
     </fileSet>
     <!-- Include documents -->
     <fileSet>
+      <directory>${basedir}</directory>
       <includes>
-        <include>${project.basedir}/README</include>
-        <include>${project.basedir}/LICENSE</include>
+        <include>NOTICE</include>
+        <include>LICENSE</include>
       </includes>
+      <outputDirectory>/jmxeval</outputDirectory>
+    </fileSet>
+    <!-- Sample config files -->
+    <fileSet>
+      <directory>${basedir}/src/main/conf</directory>
+      <includes>
+        <include>*</include>
+      </includes>
+      <outputDirectory>/jmxeval/conf</outputDirectory>
     </fileSet>
   </fileSets>
   <dependencySets>

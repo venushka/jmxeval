@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi" ssl="false" username="${username:}" password="${password:}">
+    <eval name="Java Version">
+      <query var="javaVersion" objectName="java.lang:type=Runtime" attribute="SpecVersion" />
+      <check useVar="javaVersion" mode="regex" critical="^((?!1\.8).)*$" message="Java version is ${javaVersion}" />
+    </eval>
+  </connection>
+</jmxeval:jmxeval>

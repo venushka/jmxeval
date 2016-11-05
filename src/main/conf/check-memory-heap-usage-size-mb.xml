@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi" ssl="false" username="${username:}" password="${password:}">
+    <eval name="Heap Size">
+      <query var="heapusage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />
+      <expr var="heapusagemb" expression="${heapusage} / (1024 * 1024)" scale="1" />
+      <check useVar="heapusagemb" warning="${warning}" critical="${critical}" message="Heap size is ${heapusagemb}MB">
+        <perf />
+      </check>
+    </eval>
+  </connection>
+</jmxeval:jmxeval>
