@@ -91,7 +91,7 @@ public class EvalTest {
     final EvalResult result = evalResultCaptor.getValue();
     assertEquals("Name", "MyEval", result.getName());
     assertEquals("Status", Status.UNKNOWN, result.getStatus());
-    assertEquals("Message", "Dangling meta character '*' near index 0 * ^ [java.util.regex.PatternSyntaxException]", result.getMessage());
+    assertEquals("Message", "java.util.regex.PatternSyntaxException: Dangling meta character '*' near index 0 * ^", result.getMessage());
   }
 
   /**

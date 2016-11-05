@@ -79,7 +79,7 @@ public class Eval extends Element {
       log.error("Error while evaluating check", e);
 
       // add the evaluation failure to the response
-      context.getResponse().addEvalResult(new EvalResult(name.get(), Status.UNKNOWN, e.getMessage() + " [" + e.getClass().getName() + "]"));
+      context.getResponse().addEvalResult(new EvalResult(name.get(), Status.UNKNOWN, e.getClass().getName() + ": " + e.getMessage()));
     }
   }
 }

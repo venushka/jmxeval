@@ -87,7 +87,7 @@ public class ElementBuilderTest {
       elementBuilder.build(context);
       fail("Should fails as a connection is not defined");
     } catch (JMXEvalException e) {
-      assertEquals("Invalid message", "Error: Can not read configuration file: " + absolutePath, e.getMessage());
+      assertEquals("Invalid message", "Can not read configuration file: " + absolutePath, e.getMessage());
     }
   }
 

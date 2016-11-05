@@ -49,7 +49,7 @@ public class ElementBuilder {
     final File xmlFile = new File(xmlFileName);
 
     if (!xmlFile.canRead()) {
-      throw new JMXEvalException("Error: Can not read configuration file: " + xmlFile.getAbsolutePath());
+      throw new JMXEvalException("Can not read configuration file: " + xmlFile.getAbsolutePath());
     }
 
     // Read the XML document and validate

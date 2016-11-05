@@ -72,7 +72,7 @@ public class App {
       // return status value to indicate execution status
       return context.getResponse().getStatus().getValue();
 
-    } catch (JMXEvalException e) {
+    } catch (JMXEvalException | RuntimeException e) {
       log.error("Error while evaluating checks", e);
 
       // print error
