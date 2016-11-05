@@ -12,4 +12,4 @@
 :: Execute JMXEval
 ::
 set BASE_DIR=%~dp0
-%JAVA_HOME%\bin\java -classpath %BASE_DIR%\jmxeval\lib\*.jar com.adahas.tools.jmxeval.App %*
+"%JAVA_HOME%\bin\java" -classpath "%BASE_DIR%\jmxeval\lib\*" com.adahas.tools.jmxeval.App %*

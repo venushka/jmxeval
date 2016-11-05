@@ -11,5 +11,5 @@
 #
 # Execute JMXEval
 #
-BASE_DIR=`dirname $0`
-$JAVA_HOME/bin/java -classpath "$BASE_DIR/jmxeval/lib/*.jar" com.adahas.tools.jmxeval.App $@
+BASE_DIR="`dirname $0`"
+"$JAVA_HOME/bin/java" -classpath "$BASE_DIR/jmxeval/lib/*" com.adahas.tools.jmxeval.App $@
