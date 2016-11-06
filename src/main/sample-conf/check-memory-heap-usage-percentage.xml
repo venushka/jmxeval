@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi" ssl="false" username="${username:}" password="${password:}">
+    <eval name="Heap Usage">
+      <query var="heapUsage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage">
+        <perf />
+      </query>
+      <query var="heapMax" objectName="java.lang:type=Memory" attribute="max" compositeAttribute="HeapMemoryUsage" />
+      <expr var="heapPercentage" expression="${heapUsage} / ${heapMax} * 100" scale="0" />
+      <check useVar="heapPercentage" warning="${warning:60}" critical="${critical:80}" message="Heap usage is ${heapPercentage}%">
+        <perf />
+      </check>
+    </eval>
+  </connection>
+</jmxeval:jmxeval>

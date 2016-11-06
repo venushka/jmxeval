@@ -2,8 +2,8 @@
 <jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi" ssl="false" username="${username:}" password="${password:}">
     <eval name="Heap Size">
-      <query var="heapusage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />
-      <check useVar="heapusage" warning="${memoryWarning}" critical="${memoryCritical}" message="Heap size is ${heapusage}">
+      <query var="heapUsage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />
+      <check useVar="heapUsage" warning="${memoryWarning}" critical="${memoryCritical}" message="Heap size is ${heapUsage}">
         <perf />
       </check>
     </eval>
@@ -20,7 +20,7 @@
     <eval name="GC Duration">
       <query var="gcMillis" objectName="java.lang:type=GarbageCollector,name=PS Scavenge" compositeAttribute="LastGcInfo" attribute="duration" />
       <expr var="gcSecs" expression="${gcMillis} / 1000" scale="0" />
-      <check useVar="secs" warning="${gcWarning}" critical="${gcCritical}" message="Last GC took ${gcSecs}s">
+      <check useVar="gcSecs" warning="${gcWarning}" critical="${gcCritical}" message="Last GC took ${gcSecs}s">
         <perf />
       </check>
     </eval>

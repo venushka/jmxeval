@@ -51,11 +51,11 @@
     </fileSet>
     <!-- Sample config files -->
     <fileSet>
-      <directory>${basedir}/src/main/conf</directory>
+      <directory>${basedir}/src/main/sample-conf</directory>
       <includes>
         <include>*</include>
       </includes>
-      <outputDirectory>/jmxeval/conf</outputDirectory>
+      <outputDirectory>/jmxeval/sample-conf</outputDirectory>
     </fileSet>
   </fileSets>
   <dependencySets>
