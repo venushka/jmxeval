@@ -146,8 +146,7 @@ public class AppTest {
     app.execute(new String[] {
       "testfile.xml",
       "--verbose",
-      "--validate",
-      "--schema=1.2"
+      "--validate"
     }, outputWriter, errorWriter);
 
     // then
@@ -156,7 +155,6 @@ public class AppTest {
     final Context context = contextCaptor.getValue();
 
     assertEquals("Filename", "testfile.xml", context.getFilename());
-    assertEquals("Schema version", "1.2", context.getSchemaVersion());
     assertTrue("Verbose", context.isVerbose());
     assertTrue("Validate", context.isValidate());
   }

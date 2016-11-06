@@ -39,7 +39,6 @@ public class ElementBuilderTest {
 
     doReturn(absolutePath).when(context).getFilename();
     doReturn(true).when(context).isValidate();
-    doReturn("1.2").when(context).getSchemaVersion();
 
     final ElementBuilder elementBuilder = new ElementBuilder();
     final Element rootElement = elementBuilder.build(context);
@@ -58,7 +57,6 @@ public class ElementBuilderTest {
 
     doReturn(absolutePath).when(context).getFilename();
     doReturn(true).when(context).isValidate();
-    doReturn("1.2").when(context).getSchemaVersion();
 
     final ElementBuilder elementBuilder = new ElementBuilder();
 

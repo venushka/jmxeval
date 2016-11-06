@@ -60,7 +60,7 @@ public class ElementBuilder {
 
     // Schema validation
     if (context.isValidate()) {
-      final URL schemaURL = ElementBuilder.class.getResource("/schema/jmxeval-" + context.getSchemaVersion() + ".xsd");
+      final URL schemaURL = ElementBuilder.class.getResource("/schema/jmxeval.xsd");
       builderFactory.setAttribute("http://java.sun.com/xml/jaxp/properties/schemaSource", schemaURL.toString());
     }
 

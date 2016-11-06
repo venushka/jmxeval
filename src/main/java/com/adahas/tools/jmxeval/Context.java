@@ -36,12 +36,6 @@ public class Context {
   private boolean validate;
 
   /**
-   * Schema version.
-   */
-  @Option(name = "--schema", metaVar = "<version>", usage = "set schema version")
-  private String schemaVersion;
-
-  /**
    * JMX server connection
    */
   private MBeanServerConnection connection;
@@ -163,14 +157,5 @@ public class Context {
    */
   public boolean isValidate() {
     return validate;
-  }
-
-  /**
-   * Get the schema version.
-   *
-   * @return the schemaVersion
-   */
-  public String getSchemaVersion() {
-    return schemaVersion;
   }
 }
