@@ -7,12 +7,11 @@ jmxeval
 *jmxeval* is a highly flexible Nagios/NRPE plugin for monitoring Java applications via JMX. Instead of just checking just an attribute of an MBean, JMXEval allows you to query multiple MBean attributes as well as results of MBean method invocations, and also perform mathematical computations to derive much more meaningful figures for monitoring. JMXEval can also provide all the information captured from MBeans as well as any computed figures as performance data allowing you to capture and visualise trends in Nagios.
 
 # Setting up
-
-## Requirements
-The only requirement for running *jmxeval* is a Java 7 runtime.
+The only requirement for running *jmxeval* is a Java 7 runtime. Please follow the steps below to setup *jmxeval*.
 
 ## On Linux (or any \*nix based system)
 To setup jmxeval with Nagios/NRPE,
+
 1. Download the latest version's .tar.gz file.
 2. Unpack it by running *tar -xvzf &lt;filename&gt;*
 3. Copy the *check_jmxeval* file and the *jmxeval* directory to the Nagios/NRPE plugins directory from the zip file in the Nagios plugins directory, usually */usr/lib/nagios/plugins* on Nagios server and */usr/local/nagios/libexec* when using NRPE.
@@ -21,6 +20,7 @@ To setup jmxeval with Nagios/NRPE,
 
 ## On Windows
 To setup jmxeval with NRPE,
+
 1. Download the latest version's .zip file.
 2. Unzip the file.
 3. Copy the *check_jmxeval.bat* file and the *jmxeval* directory to the NRPE plugins directory.
@@ -61,6 +61,7 @@ This make jmxeval log more information to the console while its running and in a
 
 # Configuration files
 When running jmxeval, you will need to specify a configuration file. This is an XML file that specifies what checks it should perform. A configuration file for a really simple check would specify the following.
+
 1. How to connect to the Java process.
 2. What is being checked.
 3. What information needs to be fetched from the Java process.
@@ -82,6 +83,7 @@ Let's look an example for checking the number of threads in a Java process, and 
 ```
 
 In the above example,
+
 1. *&lt;connection&gt;* specifies *how to connect*.
 2. *&lt;eval&gt;* specifies *what is being checked*.
 3. *&lt;query&gt;* specifies *what to get*.
@@ -153,8 +155,9 @@ Represents a single check. This is a container for all the other elements that p
 | host | A regular expression pattern to match against the hostname of the machine the plugin is being executed on. This is useful if there are multiple *&lt;eval&gt;* elements are configured in the same configuration file and only some of them needs to be executed in some of the monitored machines. By default, it matches all hostnames. | No | .* |
 
 Following is an example where an *&lt;eval&gt;* is defined that should only run on machines that has hostnames starting with *ec2-*.
-
-  `<eval name="EC2 Check" host="^ec2-.*">`
+```xml
+<eval name="EC2 Check" host="^ec2-.*">
+```
 
 ### &lt;connection&gt;
 Defines a JMX connection to a Java process. Any queries or method invocations on MBeans made using this connection should be nested within this element. Following attributes can be set on this element.
@@ -168,17 +171,20 @@ Defines a JMX connection to a Java process. Any queries or method invocations on
 
 The *url* to can be quite different based on how JMX is configured on the Java process you are attempted to connect to. Here are some example URLs,
 
-- Connection to a Java process running on *localhost* on port *8999*, without authentication.
+Connection to a Java process running on *localhost* on port *8999*, without authentication.
+```xml
+<connection url="service:jmx:rmi:///jndi/rmi://localhost:8999/jmxrmi">
+```
 
-   `<connection url="service:jmx:rmi:///jndi/rmi://localhost:8999/jmxrmi">`
+Connection to a Java process running on *tomcat7.adahas.com* on port *8999*, with authentication and SSL.
+```xml
+<connection url="service:jmx:rmi:///jndi/rmi://tomcat7.adahas.com:8999/jmxrmi" username="monitoruser" password="supersecret" ssl="true">
+```
 
-- Connection to a Java process running on *tomcat7.adahas.com* on port *8999*, with authentication and SSL.
-
-   `<connection url="service:jmx:rmi:///jndi/rmi://tomcat7.adahas.com:8999/jmxrmi" username="monitoruser" password="supersecret" ssl="true">`
-
-- Connection to a Java process running on host named `tomcat7.adahas.com` having JMX and JNDI services running on two different ports; JMX on port *8999* and JNDI *1099*. Note that this type of URL will only be needed if JNDI service has been configured specifically to use a different port.
-
-  `<connection url="service:jmx:rmi://tomcat7.adahas.com:8999/jndi/rmi://tomcat7.adahas.com:1099/jmxrmi">`
+Connection to a Java process running on host named `tomcat7.adahas.com` having JMX and JNDI services running on two different ports; JMX on port *8999* and JNDI *1099*. Note that this type of URL will only be needed if JNDI service has been configured specifically to use a different port.
+```xml
+<connection url="service:jmx:rmi://tomcat7.adahas.com:8999/jndi/rmi://tomcat7.adahas.com:1099/jmxrmi">
+```
 
 ### &lt;query&gt;
 Reads an attribute of a MBean and assigns it to a variable. This element must be contained in a *&lt;connection&gt;* element, which makes the JMX connection made to the Java process available to this element to execute the query. The variable that is created by this with the value of the MBean attribute can be referenced for performing calculations and alerting in the elements that follow it. Following attributes can be set on this element.
@@ -191,12 +197,14 @@ Reads an attribute of a MBean and assigns it to a variable. This element must be
 | attribute | The attribute to read the value of. When a *compositeAttribute* is set, the *attribute* will refer to the attribute name in the [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) field. | Yes | - |
 
 Following is an example of making a query for a simple attribute value.
-
-  `<query var="threadCount" objectName="java.lang:type=Threading" attribute="ThreadCount" />`
+```xml
+<query var="threadCount" objectName="java.lang:type=Threading" attribute="ThreadCount" />
+```
 
 When querying attribute of a [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) attribute, it would look like this.
-
-  `<query var="heapUsage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />`
+```xml
+<query var="heapUsage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />
+```
 
 ### &lt;exec&gt;
 Executes an MBean operation, captures the return value and assigns it to a variable. Similar to the *&lt;query&gt;* element, this also must be contained in a *&lt;connection&gt;* element, from which it acquire the connection to perform the MBean operation call. Following attributes can be set on this element.
@@ -209,16 +217,19 @@ Executes an MBean operation, captures the return value and assigns it to a varia
 | arg1 ... arg10 | Values of the arguments to pass to the operation call. The order of the arguments *must* match the order of the arguments specified in the *operation* attribute. If any of the attributes should be set to *null*, skip specifying the attribute altogether and continue with the next argument number. If an argument should be set to empty (""), specify the attribute with the value set to empty.| No | |
 
 An example of invoking a method without any arguments would look like this.
-
-  `<exec var="clearCacheSecs" objectName="com.adahas:type=CacheManager" operation="clearCaches()" />`
+```xml
+<exec var="clearCacheSecs" objectName="com.adahas:type=CacheManager" operation="clearCaches()" />
+```
 
 If the operation requires a `String` argument, it would look like this.
-
-  `<exec var="usersGB" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountry(java.lang.String)" arg1="GB" />`
+```xml
+<exec var="usersGB" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountry(java.lang.String)" arg1="GB" />
+```
 
 If the second argument need to be `null` and the third needs to have a value, you just skip specifying *arg2* altogether.
-
-  `<exec var="usersLastTenLoggedIn" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountryCityAndLimit(java.lang.String, java.lang.String, long)" arg1="GB" arg3="10" />`
+```xml
+<exec var="usersLastTenLoggedIn" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountryCityAndLimit(java.lang.String, java.lang.String, long)" arg1="GB" arg3="10" />
+```
 
 ### &lt;expr&gt;
 Evaluate a mathematical expression. It supports addition (+), subtraction (-), multiplication (\*), division (/) and remainder (%) operations. You can use parentheses ( ) to specify the order of operations. Following attributes can be set on this element.
@@ -230,12 +241,14 @@ Evaluate a mathematical expression. It supports addition (+), subtraction (-), m
 | scale | The number of decimal places to have in the result of the expression evaluation. | No | 2 |
 
 Here a simple example of an expression evaluation. This uses two variables, *heapUsage* and *heapMax*, probably created by two *&lt;query&gt;* elements before this, to calculate the heap usage as a percentage.
-
-  `<expr var="heapPercentage" expression="${heapUsage} / ${heapMax} * 100" scale="0" />`
+```xml
+<expr var="heapPercentage" expression="${heapUsage} / ${heapMax} * 100" scale="0" />
+```
 
 To calculate the free heap percentage, it can be changed to the following. By adding parenthesis, we can get the expression within the parenthesis to execute first.
-
-  `<expr var="heapPercentage" expression="(${heapMax} - ${heapUsage}) / ${heapMax} * 100" scale="0" />`
+```xml
+<expr var="heapPercentage" expression="(${heapMax} - ${heapUsage}) / ${heapMax} * 100" scale="0" />
+```
 
 ### &lt;check&gt;
 Reads a given variable and alerts if it matches the warning or critical alert criteria specified. The check can operate in two different modes, *default* and *regex* allowing a range of different ways to define the criteria for alerting.
@@ -255,16 +268,19 @@ Following attributes can be set on this element.
 | message | The message to accompany the check result in the output. | No | |
 
 Let's have a look at few checks. Simplest check would be to see if a numeric variable is greater than 75 to raise a warning, and greater than 90 to raise a critical alert.
-
-  `<check useVar="heapPercentage" warning="75" critical="90" message="Heap usage is ${heapPercentage}%">`
+```xml
+<check useVar="heapPercentage" warning="75" critical="90" message="Heap usage is ${heapPercentage}%">
+```
 
 If the variable value is text, a check can be done to see if the value exactly matches a given value. In this example, if the value of variable is "disconnected" a critical alert will be raised, and no warning alert set.
-
-  `<check useVar="queueStatus" critical="disconnected" />`
+```xml
+<check useVar="queueStatus" critical="disconnected" />
+```
 
 Irrelevant of the variable's content, be it numeric or non-numeric, regular expressions can be used to check the result. This example raises a warning alert if the variable has a value that contains the word *awaiting lock* and a critical alert if it contains *dead lock* or *failed*.
-
-  `<check useVar="lockStatus" warning=".*awaiting\slock" critical=".*(dead\slock|failed).*" />`
+```xml
+<check useVar="lockStatus" warning=".*awaiting\slock" critical=".*(dead\slock|failed).*" />
+```
 
 ### &lt;perf&gt;
 Captures information from the element that contains a *&lt;perf&gt;* element and reports it as [performance data](https://nagios-plugins.org/doc/guidelines.html#AEN200) for Nagios. Performance data allows Nagios to produce charts and graphs allowing you to identify trends and troubleshoot issues.
@@ -284,8 +300,9 @@ A *&lt;perf&gt;* element can be nested in *&lt;query&gt;*, *&lt;exec&gt;*, *&lt;
 *jmxeval* uses variables to hold information captured from MBeans, results from evaluating mathematical expressions, perform checks for raising alerts and report performance data. Many of the XMl elements in the configuration files creates variables as part of their role when the plugin is executing, the elements that follow can refer to them by the ${varName} notation.
 
 In addition to this, you can also define variables via [the command line](#command-syntax), which can then be referred in the configuration files. For example, you run *jmxeval* with `--set host=tomcat7.adahas.com --set port=8999` as a command line argument, and then refer in the configuration file as follows.
-
-  `<connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi">`
+```xml
+<connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi">
+```
 
 This makes the configuration files much more reusable, as you can make all the process specific information and even the alert levels parameterised, so you can use the same configuration file to do similar (but not same) checks in multiple processes using the same configuration file. For example, the following configuration file allow you to set the process specific information such as *host* and *port*, along with the *warning* and *critical* alert thresholds via the command line.
 
@@ -341,7 +358,7 @@ So, for the above example, the following configuration file will use the default
 
 # Feature requests & issues
 
-If you have any feature requests or encounter a bug please do [raise is here](https://github.com/venushka/jmxeval/issues).
+If you have any feature requests or encounter a bug please do [raise it here](https://github.com/venushka/jmxeval/issues).
 
 # License
 
