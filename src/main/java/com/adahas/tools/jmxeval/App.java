@@ -63,7 +63,7 @@ public class App {
       jmxEval.process();
 
       // set elapsed time in seconds
-      final double elapsedTime = (System.currentTimeMillis() - startTime) / 1000;
+      final double elapsedTime = (System.currentTimeMillis() - startTime) / 1000.0;
       context.getResponse().addPerfData(new PerfDataResult("time", String.valueOf(elapsedTime), "s", null, null, null, null));
 
       // print response
