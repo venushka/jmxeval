@@ -85,7 +85,7 @@ public class Query extends Element implements PerfDataSupport {
       } else {
         final CompositeData compositeData = (CompositeData) context.getConnection().getAttribute(mbeanName, compositeAttribute.get());
         if (compositeData == null) {
-          throw new JMXEvalException("Unable to get composite key");
+          throw new JMXEvalException("Unable to get composite attribute");
         }
         attributeValue = compositeData.get(attribute.get());
       }

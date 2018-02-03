@@ -1,4 +1,4 @@
-<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <connection url="service:jmx:rmi:///jndi/rmi://localhost:1199/jmxrmi" ssl="false" username="mod" password="secret">
     <eval name="jvm_heap_usage">
       <query var="jvm_heap_usage_var" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />

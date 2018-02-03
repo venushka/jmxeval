@@ -5,9 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.management.JMException;
-import javax.management.MBeanInfo;
-import javax.management.MBeanOperationInfo;
 import javax.management.ObjectName;
+import javax.management.openmbean.CompositeData;
 
 import org.w3c.dom.Node;
 
@@ -37,9 +36,14 @@ public class Exec extends Element implements PerfDataSupport {
   private final Field operation;
 
   /**
-   * List of arguments
+   * Composite MBean attribute name (optional)
    */
-  private final List<Field> arguments = new ArrayList<>();
+  private final Field compositeAttribute;
+
+  /**
+   * MBean value to use if JMX failure.
+   */
+  private final Field valueOnFailure;
 
   /**
    * Constructs the element
@@ -53,10 +57,8 @@ public class Exec extends Element implements PerfDataSupport {
     this.var = getNodeAttr(node, "var");
     this.objectName = getNodeAttr(node, "objectName");
     this.operation = getNodeAttr(node, "operation");
-
-    for (int i = 1; i < 10; i++) {
-      arguments.add(getNodeAttr(node, "arg" + i));
-    }
+    this.compositeAttribute = getNodeAttr(node, "compositeAttribute");
+    this.valueOnFailure = getNodeAttr(node, "valueOnFailure");
   }
 
   /**
@@ -64,70 +66,56 @@ public class Exec extends Element implements PerfDataSupport {
    */
   @Override
   public void process() throws JMXEvalException {
+
+    final List<Arg> arguments = new ArrayList<>();
+    for (final Element child : childElements) {
+      if (child instanceof Arg) {
+        arguments.add((Arg) child);
+      }
+    }
+
+
+    if (context.getConnection() == null) {
+      throw new JMXEvalException("Could not connect to server");
+    }
+
     try {
-      if (context.getConnection() == null) {
-        throw new JMXEvalException("Could not connect to server");
-      }
-
       final ObjectName mbeanName = new ObjectName(objectName.get());
-      final MBeanInfo mbeanInfo = context.getConnection().getMBeanInfo(mbeanName);
-      final MBeanOperationInfo[] operationInfoArr = mbeanInfo.getOperations();
-
-      // find the operation to execute
-      MBeanOperationInfo operationInfo = null;
-      for (final MBeanOperationInfo op : operationInfoArr) {
-        if (getSignature(op).equals(operation.get().replaceAll(" ", ""))) {
-          operationInfo = op;
-          break;
-        }
-      }
-
-      if (operationInfo == null) {
-        throw new JMXEvalException("Could not find the operation: [" + operation + "]");
-      }
 
       // prepare arguments
-      final String operationName = operationInfo.getName();
-      final String[] argTypes = new String[operationInfo.getSignature().length];
-      final Object[] argValues = new Object[operationInfo.getSignature().length];
+      final String operationName = operation.get();
+      final String[] argTypes = new String[arguments.size()];
+      final Object[] argValues = new Object[arguments.size()];
 
-      for (int i = 0; i < operationInfo.getSignature().length; i++) {
-        argTypes[i] = operationInfo.getSignature()[i].getType();
-        argValues[i] = getValue(argTypes[i], arguments.get(i).get());
+      for (int i = 0; i < arguments.size(); i++) {
+        final Arg arg = arguments.get(i);
+        argTypes[i] = arg.getType().get();
+        argValues[i] = getValue(arg.getType().get(), arg.getValue().get());
       }
 
       // invoke the method
       final Object returnValue = context.getConnection().invoke(mbeanName, operationName, argValues, argTypes);
 
-      // set query result as variable
-      context.setVar(var.get(), returnValue);
+      // set execution result as variable
+      if (compositeAttribute.get() == null) {
+        context.setVar(var.get(), returnValue);
+      } else if (returnValue instanceof CompositeData) {
+        final CompositeData compositeData = (CompositeData) returnValue;
+        context.setVar(var.get(), compositeData.get(compositeAttribute.get()));
+      } else {
+        throw new JMXEvalException("Unable to get composite attribute");
+      }
 
       // process child elements
       super.process();
 
-    } catch (IOException | JMException e) {
-      throw new JMXEvalException("Executing operation failed [" + operation + "] on object [" + objectName + "]", e);
-    }
-  }
-
-  /**
-   * Get the signature of a {@link MBeanOperationInfo}.
-   *
-   * @param operationInfo MBean operation
-   * @return the method signature
-   */
-  private String getSignature(final MBeanOperationInfo operationInfo) {
-    final StringBuilder signature = new StringBuilder();
-    signature.append(operationInfo.getName());
-    signature.append("(");
-    for (int i = 0; i < operationInfo.getSignature().length; i++) {
-      if (i > 0) {
-        signature.append(",");
+    } catch (IOException | JMException | JMXEvalException e) {
+      if (valueOnFailure.get() == null) {
+        throw new JMXEvalException("Executing operation failed [" + operation + "] on object [" + objectName + "]", e);
       }
-      signature.append(String.valueOf(operationInfo.getSignature()[i].getType()));
+
+      context.setVar(var.get(), valueOnFailure.get());
     }
-    signature.append(")");
-    return signature.toString();
   }
 
   /**
@@ -139,10 +127,14 @@ public class Exec extends Element implements PerfDataSupport {
    * @throws JMXEvalException if the type is not supported
    */
   private Object getValue(final String argType, final String argValue) throws JMXEvalException { // NOSONAR Each data type needs to be mapped, and this is the simplest way of mapping
-    if ("java.lang.String".equals(argType)) {
+    if (argValue == null) {
+      return null;
+    } else if ("java.lang.String".equals(argType)) {
       return argValue;
     } else if ("boolean".equals(argType)) {
       return Boolean.valueOf(argValue);
+    } else if ("char".equals(argType)) {
+      return argValue.charAt(0);
     } else if ("byte".equals(argType)) {
       return Byte.valueOf(argValue);
     } else if ("short".equals(argType)) {
@@ -151,6 +143,10 @@ public class Exec extends Element implements PerfDataSupport {
       return Integer.valueOf(argValue);
     } else if ("long".equals(argType)) {
       return Long.valueOf(argValue);
+    } else if ("float".equals(argType)) {
+      return Float.valueOf(argValue);
+    } else if ("double".equals(argType)) {
+      return Double.valueOf(argValue);
     } else {
       throw new JMXEvalException("Unsupported argument type: " + argType);
     }

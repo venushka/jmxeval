@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
-    targetNamespace="http://www.adahas.com/schema/jmxeval-1.2"
-    xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-1.2">
+    targetNamespace="http://www.adahas.com/schema/jmxeval-2.0"
+    xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-2.0">
     
   <xs:element name="jmxeval">
     <xs:complexType>
@@ -47,21 +47,19 @@
   
   <xs:complexType name="exec">
     <xs:sequence>
+      <xs:element name="arg" type="jmxeval:arg" minOccurs="0"/>
       <xs:element name="perf" type="jmxeval:perf" minOccurs="0" maxOccurs="1"/>
     </xs:sequence>
     <xs:attribute name="var" type="xs:string" use="required" />
     <xs:attribute name="objectName" type="xs:string" use="required" />
     <xs:attribute name="operation" type="xs:string" use="required" />
-    <xs:attribute name="arg1" type="xs:string" />
-    <xs:attribute name="arg2" type="xs:string" />
-    <xs:attribute name="arg3" type="xs:string" />
-    <xs:attribute name="arg4" type="xs:string" />
-    <xs:attribute name="arg5" type="xs:string" />
-    <xs:attribute name="arg6" type="xs:string" />
-    <xs:attribute name="arg7" type="xs:string" />
-    <xs:attribute name="arg8" type="xs:string" />
-    <xs:attribute name="arg9" type="xs:string" />
-    <xs:attribute name="arg10" type="xs:string" />
+    <xs:attribute name="compositeAttribute" type="xs:string" />
+    <xs:attribute name="valueOnFailure" type="xs:string" />
+  </xs:complexType>
+  
+  <xs:complexType name="arg">
+    <xs:attribute name="type" type="jmxeval:type" use="required" />
+    <xs:attribute name="value" type="xs:string" />
   </xs:complexType>
   
   <xs:complexType name="expr">
@@ -113,6 +111,20 @@
       <xs:enumeration value="GB"/>
       <xs:enumeration value="TB"/>
       <xs:enumeration value="c"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:simpleType name="type">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="java.lang.String"/>
+      <xs:enumeration value="boolean"/>
+      <xs:enumeration value="char"/>
+      <xs:enumeration value="byte"/>
+      <xs:enumeration value="short"/>
+      <xs:enumeration value="int"/>
+      <xs:enumeration value="long"/>
+      <xs:enumeration value="float"/>
+      <xs:enumeration value="double"/>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

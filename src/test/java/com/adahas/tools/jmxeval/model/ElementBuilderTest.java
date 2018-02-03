@@ -34,7 +34,7 @@ public class ElementBuilderTest {
    */
   @Test
   public void testBuildWithValidConfig() throws Exception {
-    final URI uri = ElementBuilder.class.getResource(this.getClass().getSimpleName() + "-schema-1_2-valid-heap-usage.xml").toURI();
+    final URI uri = ElementBuilder.class.getResource(this.getClass().getSimpleName() + "-schema-2_0-valid-heap-usage.xml").toURI();
     final String absolutePath = new File(uri).getAbsolutePath();
 
     doReturn(absolutePath).when(context).getFilename();
@@ -52,7 +52,7 @@ public class ElementBuilderTest {
    */
   @Test
   public void testBuildWithInvalidConfig() throws Exception {
-    final URI uri = ElementBuilder.class.getResource(this.getClass().getSimpleName() + "-schema-1_2-invalid-no-connection.xml").toURI();
+    final URI uri = ElementBuilder.class.getResource(this.getClass().getSimpleName() + "-schema-2_0-invalid-no-connection.xml").toURI();
     final String absolutePath = new File(uri).getAbsolutePath();
 
     doReturn(absolutePath).when(context).getFilename();

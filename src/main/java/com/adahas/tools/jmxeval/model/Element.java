@@ -19,7 +19,7 @@ public class Element {
   /**
    * References to the child elements
    */
-  private final List<Element> childElements = new ArrayList<>();
+  protected final List<Element> childElements = new ArrayList<>();
 
   /**
    * Execution context.

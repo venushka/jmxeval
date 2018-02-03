@@ -151,7 +151,7 @@ Represents a single check. This is a container for all the other elements that p
 
 | Attribute | Description | Mandatory | Default |
 | --- | --- | --- | --- |
-| name | Display name of the check. This will be the name shown in the plugin output. | Yes | |
+| name | Display name of the check. This will be the name shown in the plugin output. | Yes | - |
 | host | A regular expression pattern to match against the hostname of the machine the plugin is being executed on. This is useful if there are multiple *&lt;eval&gt;* elements are configured in the same configuration file and only some of them needs to be executed in some of the monitored machines. By default, it matches all hostnames. | No | .* |
 
 Following is an example where an *&lt;eval&gt;* is defined that should only run on machines that has hostnames starting with *ec2-*.
@@ -164,9 +164,9 @@ Defines a JMX connection to a Java process. Any queries or method invocations on
 
 | Attribute | Description | Mandatory | Default |
 | --- | --- | --- | --- |
-| url | JMX connection URL to the Java process being monitored. | Yes | |
-| username | Username to use for JMX authentication. If a username is not specified, it is assumed that no authentication is required. | No | |
-| password | Password used for authentication, ignored if a username is not set | No | |
+| url | JMX connection URL to the Java process being monitored. | Yes | - |
+| username | Username to use for JMX authentication. If a username is not specified, it is assumed that no authentication is required. | No | - |
+| password | Password used for authentication, ignored if a username is not set | No | - |
 | ssl | Use SSL enabled JMX connection. (true / false) | No | false |
 
 The *url* to can be quite different based on how JMX is configured on the Java process you are attempted to connect to. Here are some example URLs,
@@ -191,9 +191,9 @@ Reads an attribute of a MBean and assigns it to a variable. This element must be
 
 | Attribute | Description | Mandatory | Default |
 | --- | --- | --- | --- |
-| var | The name of the variable to create with the value read from the MBean attribute. This must be a variable name that is not set as reassigning values to variables is not allowed. | Yes | |
-| objectName | Name of the MBean to query. | Yes | |
-| compositeAttribute | If the attribute being queried is an attribute of a  [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) attribute, the name of CompositeData attribute. | No | |
+| var | The name of the variable to create with the value read from the MBean attribute. This must be a variable name that is not set as reassigning values to variables is not allowed. | Yes | - |
+| objectName | Name of the MBean to query. | Yes | - |
+| compositeAttribute | If the attribute being queried is an attribute of a  [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) attribute, the name of CompositeData attribute. | No | - |
 | attribute | The attribute to read the value of. When a *compositeAttribute* is set, the *attribute* will refer to the attribute name in the [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) field. | Yes | - |
 | valueOnFailure | The value to return if the query fails. These failures can include missing *objectName* or *attribute*. This is an optional attribute. If not set, JMX failures cause the plugin to fail. | No | - |
 
@@ -220,21 +220,36 @@ Executes an MBean operation, captures the return value and assigns it to a varia
 | var | The name of the variable to create with the value read returned from the MBean operation call. This must be a variable name that is not set as reassigning values to variables is not allowed. | Yes | |
 | objectName | Name of the MBean to call the operation on. | Yes | |
 | operation | The name of the operation to call, including the types of the arguments in Java method signature format. The argument types that are supported are *java.lang.String*, *boolean*, *byte*, *short*, *int* and *long*. | Yes | - |
-| arg1 ... arg10 | Values of the arguments to pass to the operation call. The order of the arguments *must* match the order of the arguments specified in the *operation* attribute. If any of the attributes should be set to *null*, skip specifying the attribute altogether and continue with the next argument number. If an argument should be set to empty (""), specify the attribute with the value set to empty.| No | |
+| valueOnFailure | The value to return if the query fails. These failures can include missing *objectName* or *attribute*. This is an optional attribute. If not set, JMX failures cause the plugin to fail. | No | - |
+
+#### &lt;arg&gt;
+
+These are nested elements in &lt;exec&gt; which allows passing arguments to the operation call. The order of the arguments *must* match the order of the arguments specified in the *operation* attribute. If any of the attributes should be set to *null*, do not set the value in the &lt;arg&gt; element. If an argument should be set to empty (""), specify the attribute with the value set to empty.
+
+| Attribute | Description | Mandatory | Default |
+| --- | --- | --- | --- |
+| type | Type of the argument. Must be one of _java.lang.String_, _boolean_, _char_, _byte_, _byte_, _short_, _int_, _long_, _float_ and _double_.| Yes | - |
+| value | Value to set in text, this will be converted to the specified _type_. Do not specify the _value_ attribute if the value should be set to _null_ | No | _null_ |
 
 An example of invoking a method without any arguments would look like this.
 ```xml
-<exec var="clearCacheSecs" objectName="com.adahas:type=CacheManager" operation="clearCaches()" />
+<exec var="clearCacheSecs" objectName="com.adahas:type=CacheManager" operation="clearCaches" />
 ```
 
 If the operation requires a `String` argument, it would look like this.
 ```xml
-<exec var="usersGB" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountry(java.lang.String)" arg1="GB" />
+<exec var="usersGB" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountry">
+  <arg type="java.lang.String" value="GB" />  
+</exec>
 ```
 
-If the second argument need to be `null` and the third needs to have a value, you just skip specifying *arg2* altogether.
+If the second argument need to be `null` and the third needs to have a value, you just skip specifying value on the second *arg* altogether.
 ```xml
-<exec var="usersLastTenLoggedIn" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountryCityAndLimit(java.lang.String, java.lang.String, long)" arg1="GB" arg3="10" />
+<exec var="usersLastTenLoggedIn" objectName="com.adahas:type=ActiveSessionManager" operation="getUserSessionsByCountryCityAndLimit">
+  <arg type="java.lang.String" value="GB" />
+  <arg type="java.lang.String" />
+  <arg type="long" value="10" />
+</exec>
 ```
 
 ### &lt;expr&gt;
