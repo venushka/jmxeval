@@ -195,6 +195,7 @@ Reads an attribute of a MBean and assigns it to a variable. This element must be
 | objectName | Name of the MBean to query. | Yes | |
 | compositeAttribute | If the attribute being queried is an attribute of a  [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) attribute, the name of CompositeData attribute. | No | |
 | attribute | The attribute to read the value of. When a *compositeAttribute* is set, the *attribute* will refer to the attribute name in the [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) field. | Yes | - |
+| valueOnFailure | The value to return if the query fails. These failures can include missing *objectName* or *attribute*. This is an optional attribute. If not set, JMX failures cause the plugin to fail. | No | - |
 
 Following is an example of making a query for a simple attribute value.
 ```xml
@@ -204,6 +205,11 @@ Following is an example of making a query for a simple attribute value.
 When querying attribute of a [CompositeData](https://docs.oracle.com/javase/7/docs/api/javax/management/openmbean/CompositeData.html) attribute, it would look like this.
 ```xml
 <query var="heapUsage" objectName="java.lang:type=Memory" attribute="used" compositeAttribute="HeapMemoryUsage" />
+```
+
+The following is an example of querying an error queue depth in an ActiveMQ cluster where the AMQ-Master is the only host that has the given *objectName*, so we want the plugin to return an *OK* if the *objectName* and/or *attribute* are missing (non-master nodes).
+```xml
+<query var="errQueueDepth" objectName="org.apache.activemq:type=Broker,brokerName=amq-broker-${nodeName},destinationType=Queue,destinationName=myErrors" attribute="QueueSize" valueOnFailure="0" />
 ```
 
 ### &lt;exec&gt;
@@ -358,11 +364,11 @@ So, for the above example, the following configuration file will use the default
 
 # Feature requests & issues
 
-If you have any feature requests or encounter a bug please do [raise it here](https://github.com/venushka/jmxeval/issues).
+If you have any feature requests or encounter a bug please do [raise it here](https://github.com/venushka/jmxeval/issues) and/or send me a pull request.
 
 # License
 
-    Copyright 2012-2016 Venushka Perera
+    Copyright 2012-2018 Venushka Perera
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.

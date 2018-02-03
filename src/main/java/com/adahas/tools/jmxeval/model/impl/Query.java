@@ -41,6 +41,11 @@ public class Query extends Element implements PerfDataSupport {
   private final Field compositeAttribute;
 
   /**
+   * MBean value to use if JMX failure.
+   */
+  private final Field valueOnFailure;
+
+  /**
    * Constructs the element
    *
    * @param context Execution context
@@ -53,6 +58,7 @@ public class Query extends Element implements PerfDataSupport {
     this.objectName = getNodeAttr(node, "objectName");
     this.attribute = getNodeAttr(node, "attribute");
     this.compositeAttribute = getNodeAttr(node, "compositeAttribute");
+    this.valueOnFailure = getNodeAttr(node, "valueOnFailure");
   }
 
   /**
@@ -60,11 +66,11 @@ public class Query extends Element implements PerfDataSupport {
    */
   @Override
   public void process() throws JMXEvalException {
-    try {
-      if (context.getConnection() == null) {
-        throw new JMXEvalException("Could not connect to server");
-      }
+    if (context.getConnection() == null) {
+      throw new JMXEvalException("Could not connect to server");
+    }
 
+    try {
       final ObjectName mbeanName = new ObjectName(objectName.get());
       Object attributeValue;
 
@@ -78,6 +84,9 @@ public class Query extends Element implements PerfDataSupport {
         }
       } else {
         final CompositeData compositeData = (CompositeData) context.getConnection().getAttribute(mbeanName, compositeAttribute.get());
+        if (compositeData == null) {
+          throw new JMXEvalException("Unable to get composite key");
+        }
         attributeValue = compositeData.get(attribute.get());
       }
 
@@ -87,8 +96,12 @@ public class Query extends Element implements PerfDataSupport {
       // process child elements
       super.process();
 
-    } catch (IOException | JMException e) {
-      throw new JMXEvalException("Failed to get [" + attribute + "] from [" + objectName + "]" + (compositeAttribute.get() == null ? "" : " in [" + compositeAttribute + "]"), e);
+    } catch (IOException | JMException | JMXEvalException e) {
+      if (valueOnFailure.get() == null) {
+        throw new JMXEvalException("Failed to get [" + attribute + "] from [" + objectName + "]" + (compositeAttribute.get() == null ? "" : " in [" + compositeAttribute + "]"), e);
+      }
+
+      context.setVar(var.get(), valueOnFailure.get());
     }
   }
 
