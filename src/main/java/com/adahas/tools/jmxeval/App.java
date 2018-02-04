@@ -117,9 +117,8 @@ public class App {
    * Get an {@link ElementBuilder} instance. Using a getter method to allow testing, due to lack of a DI framework.
    *
    * @return an {@link ElementBuilder} instance
-   * @throws JMXEvalException if building the {@link ElementBuilder} fails
    */
-  ElementBuilder getElementBuilder() throws JMXEvalException {
+  ElementBuilder getElementBuilder() {
     return new ElementBuilder();
   }
 }
