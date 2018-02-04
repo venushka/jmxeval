@@ -167,27 +167,6 @@
       </activation>
       <properties>
         <sonar.host.url>https://sonarqube.com</sonar.host.url>
-      </properties>
-    </profile>
-    <profile>
-      <id>windows</id>
-      <activation>
-        <os>
-          <family>Windows</family>
-        </os>
-      </activation>
-      <properties>
-        <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-      </properties>
-    </profile>
-    <profile>
-      <id>linux</id>
-      <activation>
-        <os>
-          <family>Linux</family>
-        </os>
-      </activation>
-      <properties>
         <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
       </properties>
     </profile>
