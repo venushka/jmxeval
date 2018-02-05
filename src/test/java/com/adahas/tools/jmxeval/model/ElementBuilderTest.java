@@ -64,7 +64,7 @@ public class ElementBuilderTest {
       elementBuilder.build(context);
       fail("Should fails as a connection is not defined");
     } catch (JMXEvalException e) {
-      assertEquals("Invalid message", "Error reading configuration file: cvc-complex-type.2.4.b: The content of element 'jmxeval:jmxeval' is not complete. One of '{connection}' is expected.", e.getMessage());
+      assertEquals("Invalid message", "Error reading configuration file: cvc-complex-type.2.4.b: The content of element 'jmxeval:jmxeval' is not complete. One of '{connection, local}' is expected.", e.getMessage());
     }
   }
 

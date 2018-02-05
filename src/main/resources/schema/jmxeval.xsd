@@ -5,12 +5,13 @@
     
   <xs:element name="jmxeval">
     <xs:complexType>
-      <xs:sequence>
-        <xs:element name="connection" type="jmxeval:connection" minOccurs="1" maxOccurs="unbounded"/>
-      </xs:sequence>
+      <xs:choice minOccurs="1" maxOccurs="unbounded">
+        <xs:element name="connection" type="jmxeval:connection" maxOccurs="unbounded"/>
+        <xs:element name="local" type="jmxeval:local" maxOccurs="unbounded"/>
+     </xs:choice>
     </xs:complexType>
   </xs:element>
-  
+
   <xs:complexType name="connection">
     <xs:sequence>
       <xs:element name="eval" type="jmxeval:eval" minOccurs="1" maxOccurs="unbounded"/>
@@ -19,6 +20,13 @@
     <xs:attribute name="username" type="xs:string" />
     <xs:attribute name="password" type="xs:string" />
     <xs:attribute name="ssl" type="xs:boolean" />
+  </xs:complexType>
+
+  <xs:complexType name="local">
+    <xs:sequence>
+      <xs:element name="eval" type="jmxeval:eval" minOccurs="1" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="pidFile" type="xs:string" use="required" />
   </xs:complexType>
   
   <xs:complexType name="eval">
