@@ -7,7 +7,7 @@ jmxeval
 *jmxeval* is a highly flexible Nagios/NRPE plugin for monitoring Java applications via JMX. Instead of just checking just an attribute of an MBean, JMXEval allows you to query multiple MBean attributes as well as results of MBean method invocations, and also perform mathematical computations to derive much more meaningful figures for monitoring. JMXEval can also provide all the information captured from MBeans as well as any computed figures as performance data allowing you to capture and visualise trends in Nagios.
 
 # Setting up
-The only requirement for running *jmxeval* is a Java 7 runtime. Please follow the steps below to setup *jmxeval*.
+The only requirement for running *jmxeval* is a Java 8 runtime. Please follow the steps below to setup *jmxeval*.
 
 ## On Linux (or any \*nix based system)
 To setup jmxeval with Nagios/NRPE,
@@ -15,7 +15,7 @@ To setup jmxeval with Nagios/NRPE,
 1. Download the latest version's .tar.gz file.
 2. Unpack it by running *tar -xvzf &lt;filename&gt;*
 3. Copy the *check_jmxeval* file and the *jmxeval* directory to the Nagios/NRPE plugins directory from the zip file in the Nagios plugins directory, usually */usr/lib/nagios/plugins* on Nagios server and */usr/local/nagios/libexec* when using NRPE.
-4. Ensure the *JAVA_HOME* environment variable is set to the location of a Java 7 or higher JRE/JDK installation, or uncomment the change the *JAVA_HOME* variable in *check_jmxeval* to point to one.
+4. Ensure the *JAVA_HOME* environment variable is set to the location of a Java 8 or higher JRE/JDK installation (you will need a JDK if you are using local attach), or uncomment the change the *JAVA_HOME* variable in *check_jmxeval* to point to one.
 5. Run the plugin in the console by executing the *check_jmxeval* script and see if it prints the [command syntax](#command-syntax).
 
 ## On Windows
@@ -24,13 +24,15 @@ To setup jmxeval with NRPE,
 1. Download the latest version's .zip file.
 2. Unzip the file.
 3. Copy the *check_jmxeval.bat* file and the *jmxeval* directory to the NRPE plugins directory.
-4. Ensure the *JAVA_HOME* environment variable is set to the location of a Java 7 or higher JRE/JDK installation, or uncomment the change the *JAVA_HOME* variable in *check_jmxeval* to point to one.
+4. Ensure the *JAVA_HOME* environment variable is set to the location of a Java 8 or higher JRE/JDK installation (you will need a JDK if you are using local attach), or uncomment the change the *JAVA_HOME* variable in *check_jmxeval* to point to one.
 5. Run the plugin in the console by executing the *check_jmxeval.bat* script and see if it prints the [command syntax](#command-syntax).
 
 # Making your Java application ready for monitoring
 jmxeval uses [JMX](http://docs.oracle.com/javase/tutorial/jmx/overview/index.html) to gather information from a running Java application to perform any checks that its configured to perform. Before setting up any checks in jmxeval, you will need to [enable JMX](http://docs.oracle.com/javase/7/docs/technotes/guides/management/agent.html) on the application you are going to monitor, and also configure authentication and SSL for JMX connections.
 
 If you are using jmxeval to monitor an application using a framework such as Spring, or an application container such as Tomcat, please refer their documentation on how to enable JMX as the preferred method of configuring JMX could be different.
+
+Alternatively, if you are running jmxeval on the same host as the application you are going to monitor, then you get jmxeval to attach to your Java process directly. You might need to add the ```-XX:+StartAttachListener``` JVM argument to the process you are attaching to. More details related under the &lt;local&gt; element.
 
 # Command syntax
 Following is the syntax for running the plugin. It can be run standalone in a console without Nagios/NRPE to check if it works as expected before using it with Nagios/NRPE.
@@ -84,7 +86,7 @@ Let's look an example for checking the number of threads in a Java process, and 
 
 In the above example,
 
-1. *&lt;connection&gt;* specifies *how to connect*.
+1. *&lt;connection&gt;* specifies *how to connect*. (you can also use *&lt;local&gt;* to attach to a locally running JVM)
 2. *&lt;eval&gt;* specifies *what is being checked*.
 3. *&lt;query&gt;* specifies *what to get*.
 4. *&lt;check&gt;* specifies *when to alert*.
@@ -184,6 +186,45 @@ Connection to a Java process running on *tomcat7.adahas.com* on port *8999*, wit
 Connection to a Java process running on host named `tomcat7.adahas.com` having JMX and JNDI services running on two different ports; JMX on port *8999* and JNDI *1099*. Note that this type of URL will only be needed if JNDI service has been configured specifically to use a different port.
 ```xml
 <connection url="service:jmx:rmi://tomcat7.adahas.com:8999/jndi/rmi://tomcat7.adahas.com:1099/jmxrmi">
+```
+
+### &lt;local&gt;
+Defines a local JMX connection to a Java process running on the same host. Any queries or method invocations on MBeans made using this connection should be nested within this element. Following attributes can be set on this element.
+
+| Attribute | Description | Mandatory | Default |
+| --- | --- | --- | --- |
+| pidFile | Fully qualified path to the PID file of the process. (A text file just containing the process ID (PID) of the Java process to connect to)| Yes | - |
+
+Connection to a Java process running locally which stores the PID in /var/run/tomcat.pid file could use a &lt;local&gt; connection like this.
+```xml
+<local pidFile="/var/run/tomcat.pid">
+```
+
+#### Important notes on using &lt;local&gt; connections
+&lt;local&gt; uses Java Attach API to connect to the local processes, which means that you need the _tools.jar_ in the classpath that's included in the JDK (not in JRE). If _jmxeval_ cannot find the required jar, it will throw an exception similar to the following. If this happens make sure that there's a _tools.jar_ in the _lib_ directory under the $JAVA_HOME directory that you've set.
+```
+Exception in thread "main" java.lang.NoClassDefFoundError: com/sun/tools/attach/AttachNotSupportedException
+        at java.lang.Class.forName0(Native Method)
+        at java.lang.Class.forName(Unknown Source)
+        at com.adahas.tools.jmxeval.model.ElementBuilder.createElementInstance(ElementBuilder.java:125)
+        at com.adahas.tools.jmxeval.model.ElementBuilder.build(ElementBuilder.java:97)
+        at com.adahas.tools.jmxeval.model.ElementBuilder.build(ElementBuilder.java:105)
+        at com.adahas.tools.jmxeval.model.ElementBuilder.build(ElementBuilder.java:74)
+        at com.adahas.tools.jmxeval.App.execute(App.java:60)
+        at com.adahas.tools.jmxeval.App.main(App.java:113)
+Caused by: java.lang.ClassNotFoundException: com.sun.tools.attach.AttachNotSupportedException
+        at java.net.URLClassLoader.findClass(Unknown Source)
+        at java.lang.ClassLoader.loadClass(Unknown Source)
+        at sun.misc.Launcher$AppClassLoader.loadClass(Unknown Source)
+        at java.lang.ClassLoader.loadClass(Unknown Source)
+        ... 8 more
+```
+Also, you will need to make sure _jmxeval_ is run by a user with enough permissions to attach to the other process.
+
+If you still still get exceptions related to permissions, you might need to add the following JVM argument to the process that _jmxeval_ is attaching to for it to allow incoming attach requests.
+
+```
+-XX:+StartAttachListener
 ```
 
 ### &lt;query&gt;

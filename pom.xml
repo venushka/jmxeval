@@ -5,7 +5,7 @@
   <name>jmxeval</name>
   <groupId>com.adahas</groupId>
   <artifactId>jmxeval</artifactId>
-  <version>3.0.1-SNAPSHOT</version>
+  <version>3.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
   <url>http://www.adahas.com/projects/jmxeval</url>
 
@@ -150,6 +150,13 @@
       <artifactId>log4j-core</artifactId>
       <version>${dep.log4j.version}</version>
     </dependency>
+    <dependency>
+      <groupId>jdk.tools</groupId>
+      <artifactId>jdk.tools</artifactId>
+      <version>jdk1.8.0</version>
+      <scope>system</scope>
+      <systemPath>${toolsjar}</systemPath>
+    </dependency>
   </dependencies>
 
   <profiles>
@@ -160,6 +167,7 @@
       </activation>
       <properties>
         <sonar.host.url>https://sonarqube.com</sonar.host.url>
+        <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
       </properties>
     </profile>
   </profiles>

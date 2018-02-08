@@ -7,9 +7,9 @@
 # If JAVA_HOME environment variable is not set, uncomment the following
 # line and set the value as the path to root of the Java directory 
 #
-# JAVA_HOME=/path/to/jdk-1.7.0
+# JAVA_HOME=/path/to/jdk-1.8.x
 #
 # Execute JMXEval
 #
 BASE_DIR="`dirname $0`"
-"$JAVA_HOME/bin/java" -classpath "$BASE_DIR/jmxeval/lib/*" com.adahas.tools.jmxeval.App $@
+"$JAVA_HOME/bin/java" -classpath "$BASE_DIR/jmxeval/lib/*:$JAVA_HOME/lib/tools.jar" com.adahas.tools.jmxeval.App $@
