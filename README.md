@@ -12,7 +12,7 @@ The only requirement for running *jmxeval* is a Java 8 runtime. Please follow th
 ## On Linux (or any \*nix based system)
 To setup jmxeval with Nagios/NRPE,
 
-1. Download the latest version's .tar.gz file.
+1. Download the latest version's jmxeval-N.N.N-bin.tar.gz file from the [releases page](https://github.com/venushka/jmxeval/releases).
 2. Unpack it by running *tar -xvzf &lt;filename&gt;*
 3. Copy the *check_jmxeval* file and the *jmxeval* directory to the Nagios/NRPE plugins directory from the zip file in the Nagios plugins directory, usually */usr/lib/nagios/plugins* on Nagios server and */usr/local/nagios/libexec* when using NRPE.
 4. Ensure the *JAVA_HOME* environment variable is set to the location of a Java 8 or higher JRE/JDK installation (you will need a JDK if you are using local attach), or uncomment the change the *JAVA_HOME* variable in *check_jmxeval* to point to one.
@@ -21,7 +21,7 @@ To setup jmxeval with Nagios/NRPE,
 ## On Windows
 To setup jmxeval with NRPE,
 
-1. Download the latest version's .zip file.
+1. Download the latest version's jmxeval-N.N.N-bin.zip file from the [releases page](https://github.com/venushka/jmxeval/releases).
 2. Unzip the file.
 3. Copy the *check_jmxeval.bat* file and the *jmxeval* directory to the NRPE plugins directory.
 4. Ensure the *JAVA_HOME* environment variable is set to the location of a Java 8 or higher JRE/JDK installation (you will need a JDK if you are using local attach), or uncomment the change the *JAVA_HOME* variable in *check_jmxeval* to point to one.
