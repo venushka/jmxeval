@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi" ssl="false" username="${username:}" password="${password:}">
+    <eval name="ActiveControllerCount">
+      <query var="ActiveControllerCount" objectName="kafka.controller:type=KafkaController,name=ActiveControllerCount" attribute="Value" />
+      <check useVar="ActiveControllerCount" critical="${critical:2}" message="ActiveControllerCount is ${ActiveControllerCount}">
+        <perf />
+      </check>
+    </eval>
+  </connection>
+</jmxeval:jmxeval>
