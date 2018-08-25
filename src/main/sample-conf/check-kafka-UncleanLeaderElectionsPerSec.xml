@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jmxeval:jmxeval xmlns:jmxeval="http://www.adahas.com/schema/jmxeval-2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connection url="service:jmx:rmi:///jndi/rmi://${host}:${port}/jmxrmi" ssl="false" username="${username:}" password="${password:}">
+    <eval name="UncleanLeaderElectionsPerSec">
+      <query var="UncleanLeaderElectionsPerSec" objectName="kafka.controller:type=ControllerStats,name=UncleanLeaderElectionsPerSec" attribute="Count" />
+      <check useVar="UncleanLeaderElectionsPerSec" critical="${critical:1}" message="UncleanLeaderElectionsPerSec is ${UncleanLeaderElectionsPerSec}">
+        <perf />
+      </check>
+    </eval>
+  </connection>
+</jmxeval:jmxeval>
