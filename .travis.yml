@@ -5,14 +5,31 @@ addons:
     organization: "default"
     token:
       secure: "daUaZjl1D20W7mA1N9uSTSASqDdDS6ALawW6DfPnm70CP2aYXvXt2JAW/x9t0vLm9oHv4YVa+rM7kmeODNwVtjiB2ZHJCk/Yp37sIUvnWMuhEvJVWmegOMBLDfRSCLoUPkGCAtafcu32neLJEx66mQXMV2qKfuJFP0i2DhbGvIbASEPGw/IDgbUh4z3LmUK5O0uny8VZazIZ3vHGD6BENaBLO7gB2RyRL0fMB4twHxf649pGoeM7ZxbQqmy5Fcuo/wfnUJ9ErXj0SH0zDB2pfbRHoxZoBTCQ8g4AQOzVQjnlg5u5ttJXw11Oaw3+ee3uaoFxwUjjp7v16XkEZ5UYIWadvmnOcfCf0c7KOmmbywSCGQcQGs6ximTmfmHHXOd4BdveeOjzZc/YIWuaKlT69G1M6MJWmUJ5YycE1fBJkLvYoS15/ljDcqlYkgcJXF1SN1kgZxFtcrLCrIE/oqaiC1y8UIVOFIcOB4o0pKfdj2XZg5tq0icS+DnJUUH2YlfoCgtwuSwEGL3r+MlrNzCABVSBpEUZ1CcDOyhV4T3NKxyJhfQ1dsF/Jwi3MFqHwAU7rkIP6nPGrVPNrhOGwWtVDhPYkAv8X8AF6XlzjlAvPcUIF3zK9zMQSvl3zrnZURsVma4zxdqs/BuOv0P0iD9wwu8l1qIQSoT6Xgx57zYT8HY="
-script:
-  - SONAR_SKIP=$(if [ "$TRAVIS_PULL_REQUEST" = "false" -a $TRAVIS_REPO_SLUG = 'venushka/jmxeval' ]; then echo "false"; else echo "true"; fi)
-  - mvn $GOALS -Dsonar.branch=$TRAVIS_BRANCH -Dsonar.skip=$SONAR_SKIP
+jobs:
+  include:
+    - if: repo = venushka/jmxeval AND branch = master AND NOT type = pull_request
+      name: "Test"
+      script:
+        - git fetch --unshallow --quiet
+        - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -B -U
+    - if: repo = venushka/jmxeval AND NOT branch = master AND NOT type = pull_request
+      name: "Test"
+      script:
+        - git fetch --unshallow --quiet
+        - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -B -U -Dsonar.branch.name=$TRAVIS_BRANCH
+    - if: repo = venushka/jmxeval AND head_repo = venushka/jmxeval AND type = pull_request
+      name: "Test"
+      script:
+        - git fetch --unshallow --quiet
+        - mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent test sonar:sonar -B -U -Dsonar.pullrequest.key=$TRAVIS_PULL_REQUEST -Dsonar.pullrequest.branch=$TRAVIS_PULL_REQUEST_BRANCH -Dsonar.pullrequest.base=$TRAVIS_BRANCH
+    - if: (repo = venushka/jmxeval AND NOT head_repo = venushka/jmxeval AND type = pull_request) OR NOT repo = venushka/jmxeval 
+      name: "Test"
+      script:
+        - mvn clean test -B -U
 matrix:
   fast_finish: true
   include:
     - jdk: oraclejdk8
-      env: GOALS="clean org.jacoco:jacoco-maven-plugin:prepare-agent package sonar:sonar"
 cache:
   directories:
     - '$HOME/.m2/repository'
