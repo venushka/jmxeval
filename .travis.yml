@@ -1,4 +1,6 @@
 language: java
+jdk:
+  - openjdk8
 install: true
 addons:
   sonarcloud:
@@ -29,7 +31,7 @@ jobs:
 matrix:
   fast_finish: true
   include:
-    - jdk: oraclejdk8
+    - jdk: openjdk8
 cache:
   directories:
     - '$HOME/.m2/repository'
