@@ -26,7 +26,7 @@
     <dep.junit.version>4.11</dep.junit.version>
     <dep.commonslang.version>3.5</dep.commonslang.version>
     <dep.commonsio.version>2.5</dep.commonsio.version>
-    <dep.log4j.version>2.7</dep.log4j.version>
+    <dep.log4j.version>2.13.2</dep.log4j.version>
 
     <!-- versions of used plugins -->
     <plugin.asciidoctor.version>1.5.0</plugin.asciidoctor.version>
