@@ -23,7 +23,7 @@
     <dep.args4j.version>2.33</dep.args4j.version>
     <dep.mockito.version>2.2.9</dep.mockito.version>
     <dep.hamcrest.version>2.0.0.0</dep.hamcrest.version>
-    <dep.junit.version>4.11</dep.junit.version>
+    <dep.junit.version>4.13.1</dep.junit.version>
     <dep.commonslang.version>3.5</dep.commonslang.version>
     <dep.commonsio.version>2.7</dep.commonsio.version>
     <dep.log4j.version>2.16.0</dep.log4j.version>
