@@ -33,19 +33,11 @@
     <plugin.clean.version>2.5</plugin.clean.version>
     <plugin.jar.version>2.5</plugin.jar.version>
     <plugin.surefire.version>2.18</plugin.surefire.version>
-    <plugin.sonar.version>3.1.1</plugin.sonar.version>
     <plugin.compiler.version>3.0</plugin.compiler.version>
     <plugin.assembly.version>2.2.2</plugin.assembly.version>
-    
-    <!-- sonar -->
-    <sonar.sources>src/main</sonar.sources>
-    <sonar.tests>src/test</sonar.tests>
-    <sonar.junit.reportsPath>target/surefire-reports</sonar.junit.reportsPath>
-    <sonar.jacoco.reportPath>target/jacoco.exec</sonar.jacoco.reportPath>
   </properties>
 
   <build>
-    <defaultGoal>install</defaultGoal>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -57,11 +49,6 @@
           <groupId>org.asciidoctor</groupId>
           <artifactId>asciidoctor-maven-plugin</artifactId>
           <version>${plugin.asciidoctor.version}</version>
-        </plugin>
-        <plugin>
-          <groupId>org.sonarsource.scanner.maven</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-          <version>${plugin.sonar.version}</version>
         </plugin>
       </plugins>    
     </pluginManagement>
@@ -92,6 +79,8 @@
           <descriptors>
             <descriptor>src/main/assembly/descriptor.xml</descriptor>
           </descriptors>
+          <finalName>jmxeval</finalName>
+          <appendAssemblyId>false</appendAssemblyId>
         </configuration>
         <executions>
           <execution>
@@ -155,20 +144,7 @@
       <artifactId>jdk.tools</artifactId>
       <version>jdk1.8.0</version>
       <scope>system</scope>
-      <systemPath>${toolsjar}</systemPath>
+      <systemPath>${java.home}/../lib/tools.jar</systemPath>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>sonar</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-      </activation>
-      <properties>
-        <sonar.host.url>https://sonarqube.com</sonar.host.url>
-        <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-      </properties>
-    </profile>
-  </profiles>
 </project>

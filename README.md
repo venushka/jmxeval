@@ -1,9 +1,6 @@
 jmxeval
 =======
 
-[![Build Status](https://travis-ci.org/venushka/jmxeval.svg?branch=master)](https://travis-ci.org/venushka/jmxeval)
-[![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=com.adahas%3Ajmxeval&metric=alert_status)](https://sonarcloud.io/dashboard/index/com.adahas:jmxeval)
-
 *jmxeval* is a highly flexible Nagios/NRPE plugin for monitoring Java applications via JMX. Instead of just checking just an attribute of an MBean, JMXEval allows you to query multiple MBean attributes as well as results of MBean method invocations, and also perform mathematical computations to derive much more meaningful figures for monitoring. JMXEval can also provide all the information captured from MBeans as well as any computed figures as performance data allowing you to capture and visualise trends in Nagios.
 
 # Setting up
